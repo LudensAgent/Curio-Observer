@@ -1,0 +1,33 @@
+# ---- Gradle ----
+.gradle/
+build/
+out/
+
+# ---- IDE ----
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+# VS Code
+.vscode/
+
+# ---- Fabric / Minecraft dev runtime ----
+run/
+# Third-party compatibility JARs (Sodium / Iris / Indium) for the renderer smoke test
+mods/
+
+# ---- Logs ----
+logs/
+*.log
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp

@@ -1,0 +1,17 @@
+{
+  "category.curio-observer": "Curio 观察者",
+  "key.curio-observer.hud": "切换旁观 HUD",
+  "key.curio-observer.brighten": "切换暗处增亮",
+  "key.curio-observer.camera": "切换自动视角",
+  "key.curio-observer.config": "打开观察者设置",
+  "curio-observer.config.title": "Curio 观察者设置",
+  "curio-observer.inventory.title": "%s 的背包",
+  "curio-observer.inventory.used": "%s/%s",
+  "curio-observer.view.camera": "自动视角：%s",
+  "curio-observer.view.third": "第三人称",
+  "curio-observer.view.first": "第一人称",
+  "curio-observer.view.standby": "待命",
+  "curio-observer.view.brighten": "暗处增亮：伽马 %s",
+  "curio-observer.view.paused": "（待命）",
+  "curio-observer.view.shaders": "（光影：夜视补光）"
+}

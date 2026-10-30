@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "dev.curio.observer.mixin",
+  "plugin": "dev.curio.observer.mixin.CurioMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "client": ["SpectatorHudMixin", "InGameHudMixin", "HeldItemRendererMixin", "WorldRendererMixin",
+    "BroadcastCameraMixin", "BroadcastStabilityMixin", "BroadcastLightmapMixin", "BroadcastNightVisionMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

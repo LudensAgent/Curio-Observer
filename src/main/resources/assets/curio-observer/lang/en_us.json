@@ -1,0 +1,17 @@
+{
+  "category.curio-observer": "Curio Observer",
+  "key.curio-observer.hud": "Toggle Spectator HUD",
+  "key.curio-observer.brighten": "Toggle Brighten Dark Areas",
+  "key.curio-observer.camera": "Toggle Auto Camera",
+  "key.curio-observer.config": "Open Observer Settings",
+  "curio-observer.config.title": "Curio Observer Settings",
+  "curio-observer.inventory.title": "%s's inventory",
+  "curio-observer.inventory.used": "%s/%s",
+  "curio-observer.view.camera": "Auto camera: %s",
+  "curio-observer.view.third": "third person",
+  "curio-observer.view.first": "first person",
+  "curio-observer.view.standby": "standby",
+  "curio-observer.view.brighten": "Brighten dark areas: gamma %s",
+  "curio-observer.view.paused": " (standby)",
+  "curio-observer.view.shaders": " (shaders: night-vision fill)"
+}

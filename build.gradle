@@ -1,0 +1,126 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+
+repositories { mavenCentral() }
+
+configurations {
+    productionSmokeRuntime
+    productionSmokeMods { transitive = false }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    productionSmokeRuntime "net.fabricmc:fabric-loader:${project.loader_version}"
+    productionSmokeRuntime "net.fabricmc:intermediary:${project.minecraft_version}:v2"
+    productionSmokeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand 'version': project.version }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
+    withSourcesJar()
+}
+
+test { useJUnitPlatform() }
+
+// Exercise the published bytecode too: named development classes alone do not prove release compatibility.
+tasks.register('releaseMixinTest', Test) {
+    dependsOn tasks.named('remapJar'), tasks.named('testClasses')
+    inputs.file(tasks.named('remapJar').flatMap { it.archiveFile }).withPropertyName('releaseJar')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter { includeTestsMatching 'dev.curio.observer.smoke.ReleaseMixinCompatibilityTest' }
+    doFirst {
+        systemProperty 'curio.releaseJar', tasks.named('remapJar').get().archiveFile.get().asFile.absolutePath
+    }
+}
+tasks.named('check') { dependsOn tasks.named('releaseMixinTest') }
+
+// Optional real-mod checks run in a separate intermediary Knot runtime. The normal JUnit
+// runtime stays named and vanilla, so it continues to exercise our vanilla redirects.
+def smokeReleaseJar = providers.provider {
+    providers.gradleProperty('smokeReleaseJar').isPresent()
+            ? file(providers.gradleProperty('smokeReleaseJar').get())
+            : tasks.named('remapJar').get().archiveFile.get().asFile
+}
+def rendererModsDir = providers.gradleProperty('compatibilityModsDir')
+def rendererMods = providers.provider {
+    rendererModsDir.isPresent() ? fileTree(rendererModsDir.get()) {
+        include 'sodium-*.jar', 'sodium-*.jar.disabled'
+        include 'iris-*.jar', 'iris-*.jar.disabled'
+        include 'indium-*.jar', 'indium-*.jar.disabled'
+    } : files()
+}
+def preparedRendererMods = layout.buildDirectory.dir('renderer-compatibility-mods')
+tasks.register('prepareRendererCompatibilityMods', Sync) {
+    from rendererMods
+    into preparedRendererMods
+    rename { it.replaceFirst(/\.disabled$/, '') }
+    doFirst {
+        if (!rendererModsDir.isPresent()) {
+            throw new GradleException('Pass -PcompatibilityModsDir=<directory containing Sodium, Iris and Indium JARs>')
+        }
+        ['sodium-', 'iris-', 'indium-'].each { prefix ->
+            if (rendererMods.get().files.count { it.name.startsWith(prefix) } != 1) {
+                throw new GradleException("Expected exactly one ${prefix}*.jar[.disabled] in ${rendererModsDir.get()}")
+            }
+        }
+    }
+}
+
+def configureProductionSmoke = { JavaExec task, boolean withRendererMods ->
+    task.dependsOn tasks.named('remapJar'), tasks.named('testClasses')
+    task.inputs.file(smokeReleaseJar).withPropertyName('releaseJar')
+    task.javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+    task.mainClass = 'dev.curio.observer.smoke.ProductionMixinSmoke'
+    task.classpath = sourceSets.test.output.classesDirs + configurations.productionSmokeRuntime +
+            configurations.minecraftRuntimeLibraries + configurations.loaderLibraries +
+            loom.getMinecraftJarsCollection(net.fabricmc.loom.api.mappings.layered.MappingsNamespace.INTERMEDIARY)
+    if (withRendererMods) task.dependsOn tasks.named('prepareRendererCompatibilityMods')
+    task.doFirst {
+        def gameDir = layout.buildDirectory.dir(task.name).get().asFile
+        gameDir.mkdirs()
+        def mods = [smokeReleaseJar.get()] + configurations.productionSmokeMods.files.toList()
+        if (withRendererMods) mods += fileTree(preparedRendererMods).matching { include '*.jar' }.files
+        task.workingDir = gameDir
+        task.args = [gameDir.absolutePath, withRendererMods.toString()]
+        task.systemProperty 'fabric.development', 'false'
+        task.systemProperty 'fabric.unitTest', 'true'
+        task.systemProperty 'fabric.gameJarPath', loom.getMinecraftJars(
+                net.fabricmc.loom.api.mappings.layered.MappingsNamespace.INTERMEDIARY).first().toString()
+        task.systemProperty 'fabric.addMods', mods.collect { it.absolutePath }.join(File.pathSeparator)
+    }
+}
+tasks.register('productionMixinSmoke', JavaExec) {
+    group = 'verification'
+    description = 'Applies the published mixins to vanilla Minecraft in the production namespace.'
+    configureProductionSmoke(delegate, false)
+}
+tasks.register('rendererCompatibilitySmoke', JavaExec) {
+    group = 'verification'
+    description = 'Applies the published mixins alongside real Sodium, Iris and Indium JARs.'
+    configureProductionSmoke(delegate, true)
+}
