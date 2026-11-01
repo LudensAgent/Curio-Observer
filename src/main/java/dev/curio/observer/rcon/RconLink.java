@@ -30,6 +30,8 @@ public final class RconLink implements AutoCloseable {
     private static final int AUTH_RESPONSE = 2;
     private static final int EXECCOMMAND = 2;
     private static final int RESPONSE_VALUE = 0;
+    /** Extra time after the poll interval before a snapshot is considered stale. */
+    private static final long SNAPSHOT_GRACE_MS = 5_000;
 
     private final String host;
     private final int port;
@@ -101,7 +103,7 @@ public final class RconLink implements AutoCloseable {
 
     private RconSnapshot poll(DataInputStream in, DataOutputStream out, String name) throws IOException {
         String response = command(in, out, "data get entity " + name);
-        return response == null ? null : parse(name, response);
+        return response == null ? null : parse(name, response, pollMillis);
     }
 
     private String command(DataInputStream in, DataOutputStream out, String command) throws IOException {
@@ -182,7 +184,7 @@ public final class RconLink implements AutoCloseable {
     }
 
     /** Parses the {@code data get entity <name>} feedback: a message prefix followed by the SNBT compound. */
-    private static RconSnapshot parse(String name, String response) {
+    private static RconSnapshot parse(String name, String response, long pollMillis) {
         int brace = response.indexOf('{');
         if (brace < 0) return null;
         NbtCompound root;
@@ -216,7 +218,7 @@ public final class RconLink implements AutoCloseable {
         float xpProgress = MathHelper.clamp(root.getFloat("XpProgress"), 0.0F, 1.0F);
         int selected = MathHelper.clamp(root.getInt("SelectedItemSlot"), 0, 8);
         return new RconSnapshot(name, System.currentTimeMillis(), Arrays.asList(head, chest, legs, feet),
-                hotbar, offhand, main, selected, food, saturation, xpLevel, xpProgress);
+                hotbar, offhand, main, selected, food, saturation, xpLevel, xpProgress, pollMillis + SNAPSHOT_GRACE_MS);
     }
 
     private static Protocol.ItemData itemData(NbtCompound item) {
