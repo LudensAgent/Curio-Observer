@@ -124,15 +124,32 @@ public final class RconLink implements AutoCloseable {
     }
 
     private String receive(DataInputStream in, int expectedId) throws IOException {
-        int length = readIntLE(in);
-        int rid = readIntLE(in);
-        int type = readIntLE(in);
-        byte[] payload = new byte[Math.max(0, length - 8)];
-        in.readFully(payload);
-        if (type != RESPONSE_VALUE || rid != expectedId) return "";
-        int end = payload.length;
-        while (end > 0 && payload[end - 1] == 0) end--;
-        return new String(payload, 0, end, StandardCharsets.UTF_8);
+        StringBuilder response = new StringBuilder();
+        while (true) {
+            int length = readIntLE(in);
+            int rid = readIntLE(in);
+            int type = readIntLE(in);
+            byte[] payload = new byte[Math.max(0, length - 10)];
+            in.readFully(payload);
+            if (type != RESPONSE_VALUE || rid != expectedId) return response.toString();
+            String chunk = new String(payload, StandardCharsets.UTF_8);
+            response.append(chunk);
+            // Minecraft splits responses longer than 4096 characters into several same-id packets and
+            // sends no terminator. A short chunk ends the sequence; an exactly-4096-char final chunk is
+            // detected once the SNBT compound it carries is complete.
+            if (chunk.length() < 4096 || completeCompound(response.toString())) return response.toString();
+        }
+    }
+
+    private static boolean completeCompound(String text) {
+        int brace = text.indexOf('{');
+        if (brace < 0) return false;
+        try {
+            NbtHelper.fromNbtProviderString(text.substring(brace));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     private int nextRequestId() {
