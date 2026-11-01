@@ -41,12 +41,13 @@ public final class Protocol {
             bounded(agentVersion, 128, "agent version");
         }
     }
-    public record State(float health, float absorption, int food, float saturation, int oxygen, Xp xp,
-                        List<ItemData> armor, List<ItemData> hotbar, ItemData offhand,
+    public record State(float health, float absorption, float maxHealth, int food, float saturation, int oxygen,
+                        Xp xp, List<ItemData> armor, List<ItemData> hotbar, ItemData offhand,
                         int selected, List<ItemData> main) {
         public State {
             finiteRange(health, 0, 1024, "health");
             finiteRange(absorption, 0, 1024, "absorption");
+            finiteRange(maxHealth, 0, 1024, "maximum health");
             range(food, 0, 20, "food");
             finiteRange(saturation, 0, 20, "saturation");
             range(oxygen, 0, 20, "oxygen");
@@ -57,7 +58,7 @@ public final class Protocol {
             range(selected, 0, 8, "selected hotbar slot");
         }
         public static State empty() {
-            return new State(0, 0, 0, 0, 20, new Xp(0, 0), emptySlots(4), emptySlots(9), null, 0, emptySlots(27));
+            return new State(0, 0, 20, 0, 0, 20, new Xp(0, 0), emptySlots(4), emptySlots(9), null, 0, emptySlots(27));
         }
     }
 

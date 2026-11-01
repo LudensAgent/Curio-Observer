@@ -29,12 +29,13 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Actions actio
         Protocol.Hello hello = new Protocol.Hello(Protocol.VERSION, name, "1.20.1", "pure");
         float health = player.getHealth();
         float absorption = player.getAbsorptionAmount();
+        float maxHealth = player.getMaxHealth();
         long now = System.currentTimeMillis();
         Protocol.State state = rcon != null && rcon.forPlayer(name) && rcon.fresh(now)
-                ? new Protocol.State(health, absorption, rcon.food(), rcon.saturation(), 20,
+                ? new Protocol.State(health, absorption, maxHealth, rcon.food(), rcon.saturation(), 20,
                         new Protocol.Xp(rcon.xpLevel(), rcon.xpProgress()),
                         rcon.armor(), rcon.hotbar(), rcon.offhand(), rcon.selected(), rcon.main())
-                : clientState(player, health, absorption);
+                : clientState(player, health, absorption, maxHealth);
         return new BotState(hello, state, actionsOf(player, now), true);
     }
 
@@ -49,7 +50,7 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Actions actio
         return new Actions("", changedAt, swingAt, eating, useAt);
     }
 
-    private static Protocol.State clientState(PlayerEntity player, float health, float absorption) {
+    private static Protocol.State clientState(PlayerEntity player, float health, float absorption, float maxHealth) {
         // Empty slots decode to null, so this must be a null-tolerant list (List.of rejects nulls).
         List<Protocol.ItemData> armor = Arrays.asList(
                 ItemCodec.toData(player.getEquippedStack(EquipmentSlot.HEAD)),
@@ -61,7 +62,7 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Actions actio
         int selected = MathHelper.clamp(player.getInventory().selectedSlot, 0, 8);
         List<Protocol.ItemData> hotbar = new ArrayList<>(Protocol.emptySlots(9));
         hotbar.set(selected, held);
-        return new Protocol.State(health, absorption,
+        return new Protocol.State(health, absorption, maxHealth,
                 MathHelper.clamp(player.getHungerManager().getFoodLevel(), 0, 20),
                 MathHelper.clamp(player.getHungerManager().getSaturationLevel(), 0, 20),
                 20, new Protocol.Xp(player.experienceLevel, player.experienceProgress),
@@ -72,7 +73,7 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Actions actio
     public boolean renderable() { return hasState; }
 
     public float health() { return state.health(); }
-    public float maxHealth() { return Math.max(20, health()); }
+    public float maxHealth() { return state.maxHealth(); }
     public float absorption() { return state.absorption(); }
     public int food() { return state.food(); }
     public float saturation() { return state.saturation(); }
