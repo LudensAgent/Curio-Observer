@@ -131,10 +131,14 @@ public final class RconLink implements AutoCloseable {
             int length = readIntLE(in);
             int rid = readIntLE(in);
             int type = readIntLE(in);
-            byte[] payload = new byte[Math.max(0, length - 10)];
+            // Each packet appends two null bytes to its payload; read them so they never desync the
+            // next packet, then strip them before decoding.
+            byte[] payload = new byte[Math.max(0, length - 8)];
             in.readFully(payload);
             if (type != RESPONSE_VALUE || rid != expectedId) return response.toString();
-            String chunk = new String(payload, StandardCharsets.UTF_8);
+            int end = payload.length;
+            while (end > 0 && payload[end - 1] == 0) end--;
+            String chunk = new String(payload, 0, end, StandardCharsets.UTF_8);
             response.append(chunk);
             // Minecraft splits responses longer than 4096 characters into several same-id packets and
             // sends no terminator. A short chunk ends the sequence; an exactly-4096-char final chunk is
