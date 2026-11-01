@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -197,7 +198,7 @@ public final class RconLink implements AutoCloseable {
         int xpLevel = Math.max(0, root.getInt("XpLevel"));
         float xpProgress = MathHelper.clamp(root.getFloat("XpProgress"), 0.0F, 1.0F);
         int selected = MathHelper.clamp(root.getInt("SelectedItemSlot"), 0, 8);
-        return new RconSnapshot(name, System.currentTimeMillis(), List.of(head, chest, legs, feet),
+        return new RconSnapshot(name, System.currentTimeMillis(), Arrays.asList(head, chest, legs, feet),
                 hotbar, offhand, main, selected, food, saturation, xpLevel, xpProgress);
     }
 

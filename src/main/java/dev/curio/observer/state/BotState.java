@@ -3,6 +3,7 @@ package dev.curio.observer.state;
 import dev.curio.observer.model.Protocol;
 import dev.curio.observer.rcon.RconSnapshot;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,7 +38,8 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Actions actio
     }
 
     private static Protocol.State clientState(PlayerEntity player, float health, float absorption) {
-        List<Protocol.ItemData> armor = List.of(
+        // Empty slots decode to null, so this must be a null-tolerant list (List.of rejects nulls).
+        List<Protocol.ItemData> armor = Arrays.asList(
                 ItemCodec.toData(player.getEquippedStack(EquipmentSlot.HEAD)),
                 ItemCodec.toData(player.getEquippedStack(EquipmentSlot.CHEST)),
                 ItemCodec.toData(player.getEquippedStack(EquipmentSlot.LEGS)),
