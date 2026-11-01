@@ -87,7 +87,7 @@ public final class ContainerOverlay {
                         ? window.slots().get(slot.index()) : playerItem(state, slot.playerSlot());
                 drawSlot(context, item, slot.x(), slot.y(), pulse);
             }
-            drawCursor(context, layout, window, state.cursor(), now);
+            drawCarriedItem(context, layout, window, state.cursor(), now);
             drawTransfer(context, layout, window, now, fade);
         } finally {
             context.setShaderColor(1, 1, 1, 1);
@@ -273,25 +273,18 @@ public final class ContainerOverlay {
         }
     }
 
-    private void drawCursor(DrawContext context, ContainerLayout layout, BotState.Window window,
-                            Protocol.ItemData current, long now) {
+    private void drawCarriedItem(DrawContext context, ContainerLayout layout, BotState.Window window,
+                                 Protocol.ItemData current, long now) {
         var frame = pointer.sample(layout, window, current, now);
-        if (!frame.visible()) return;
+        if (!frame.visible() || frame.item() == null) return;
         int x = Math.round(frame.x()), y = Math.round(frame.y());
         context.getMatrices().push();
         context.getMatrices().translate(0, 0, 300);
         try {
-            // The small pointer remains visible when empty, so pickup and release
-            // read as clicks instead of an item teleporting between slots.
-            context.fill(x - 1, y - 1, x + 3, y + 10, 0xFF202020);
-            context.fill(x, y, x + 2, y + 8, 0xFFFFFFFF);
-            context.fill(x, y + 1, x + 7, y + 3, 0xFFFFFFFF);
-            if (frame.item() != null) {
-                ItemStack stack = ItemCodec.stack(frame.item());
-                context.drawItem(stack, x + 4, y + 4);
-                context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x + 4, y + 4,
-                        Integer.toString(frame.item().count()));
-            }
+            ItemStack stack = ItemCodec.stack(frame.item());
+            context.drawItem(stack, x + 4, y + 4);
+            context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x + 4, y + 4,
+                    Integer.toString(frame.item().count()));
         } finally {
             context.getMatrices().pop();
         }

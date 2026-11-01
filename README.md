@@ -182,7 +182,7 @@ It stays connected after the sequence for inspection; `--run` starts the sequenc
 - Without a matching bot feed, private windows cannot be displayed. Without a feed or RCON, inventory/hunger/XP are limited to the observer client's data.
 - Stonecutter recipe lists, loom pattern menus, beacon choices and cartography map previews are not yet synchronized. Their slots and outputs are shown, not the complete vanilla interface.
 - Horse inventories, lecterns, book/sign editors and custom mod screens do not have dedicated layouts. Unknown windows use a generic slot grid, which cannot reproduce special controls.
-- A bot has no physical mouse or GUI scroll position. Pointer animation follows slot changes or optional pointer events; the trade list follows the selected offer.
+- A bot has no physical mouse or GUI scroll position. Carried-item animation follows slot changes or optional pointer events without drawing a mouse cursor; the trade list follows the selected offer.
 - Full item detail requires the optional NBT field. Legacy feeds with only an enchantment flag use a simplified glint.
 - The bridge observes existing actions; it does not add crafting/trading abilities missing from the bot or its Mineflayer/prismarine-windows version.
 
