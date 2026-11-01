@@ -36,6 +36,9 @@ public final class CurioObserverClient implements ClientModInitializer {
     private static Path configPath;
     private static RconLink rcon;
     private static volatile String rconTarget;
+    private static String spectatedName;
+    private static long lastReobserveAt;
+    private static final long REOBSERVE_COOLDOWN_MS = 2_000;
     private static KeyBinding hudKey;
     private static KeyBinding brightenKey;
     private static KeyBinding cameraKey;
@@ -66,7 +69,8 @@ public final class CurioObserverClient implements ClientModInitializer {
                 client.setScreen(new ObserverConfigScreen(client.currentScreen, config, CurioObserverClient::saveAndRestartRcon));
             }
             PlayerEntity target = spectatedPlayer();
-            rconTarget = target == null ? null : target.getGameProfile().getName();
+            rconTarget = target == null || target.isRemoved() ? null : target.getGameProfile().getName();
+            trackSpectate(target);
         });
         HudRenderCallback.EVENT.register((context, tickDelta) -> {
             BotState state = snapshot();
@@ -110,6 +114,30 @@ public final class CurioObserverClient implements ClientModInitializer {
         if (client.world == null) return null;
         if (client.getCameraEntity() instanceof PlayerEntity player && player != client.player) return player;
         return null;
+    }
+
+    /**
+     * Keeps following a spectated player across a dimension change. The camera still points at the
+     * removed entity after the target leaves this world, so once it is removed we ask the server to
+     * move the observer along and re-attach the camera ({@code spectate} teleports across dimensions).
+     */
+    private static void trackSpectate(PlayerEntity target) {
+        if (target == null) {
+            spectatedName = null;
+            return;
+        }
+        if (!target.isRemoved()) {
+            spectatedName = target.getGameProfile().getName();
+            return;
+        }
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (spectatedName == null || client.player == null || !client.player.isSpectator()
+                || client.getNetworkHandler() == null) return;
+        long now = System.currentTimeMillis();
+        if (now - lastReobserveAt >= REOBSERVE_COOLDOWN_MS) {
+            lastReobserveAt = now;
+            client.getNetworkHandler().sendChatCommand("spectate " + spectatedName);
+        }
     }
 
     public static boolean isObserving(BotState state) {
