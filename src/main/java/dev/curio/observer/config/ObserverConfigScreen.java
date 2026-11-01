@@ -18,6 +18,8 @@ public final class ObserverConfigScreen extends Screen {
     private static final int ROW = 24;
     private static final int LABEL_W = 120;
     private static final int FIELD_W = 150;
+    private static final int CONTENT_TOP = 32;
+    private static final int FOOTER_HEIGHT = 44;
 
     private final Screen parent;
     private final ObserverConfig config;
@@ -77,7 +79,9 @@ public final class ObserverConfigScreen extends Screen {
         hudScaleField.setText(Double.toString(config.hudScale));
         gammaField.setText(Double.toString(config.gamma));
 
-        for (ClickableWidget widget : widgets) addDrawableChild(widget);
+        // Content is drawn and clipped manually so it stays inside the scroll region; the bottom
+        // buttons remain drawable children and are rendered by the parent on top.
+        for (ClickableWidget widget : widgets) addSelectableChild(widget);
 
         doneButton = ButtonWidget.builder(Text.translatable("gui.done"), b -> done())
                 .dimensions(0, 0, 120, 20).build();
@@ -113,12 +117,11 @@ public final class ObserverConfigScreen extends Screen {
     }
 
     private void reposition() {
-        int contentTop = 32;
-        int contentHeight = widgets.size() * ROW + contentTop;
-        int maxScroll = Math.max(0, contentHeight - (height - 44));
+        int contentHeight = widgets.size() * ROW + CONTENT_TOP;
+        int maxScroll = Math.max(0, contentHeight - (height - FOOTER_HEIGHT));
         scroll = Math.max(0, Math.min(scroll, maxScroll));
 
-        int y = contentTop - scroll;
+        int y = CONTENT_TOP - scroll;
         for (int i = 0; i < widgets.size(); i++) {
             ClickableWidget widget = widgets.get(i);
             if (labels.get(i) == null) { widget.setX(PAD); widget.setWidth(width - PAD * 2); }
@@ -137,6 +140,33 @@ public final class ObserverConfigScreen extends Screen {
     private void scrollBy(int amount) {
         scroll += amount;
         reposition();
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // Bottom controls sit above the scrollable content and must win the click.
+        if (click(doneButton, mouseX, mouseY, button)
+                || click(upButton, mouseX, mouseY, button)
+                || click(downButton, mouseX, mouseY, button)) return true;
+        int bottom = height - FOOTER_HEIGHT;
+        for (ClickableWidget widget : widgets) {
+            if (widget.getY() >= bottom || widget.getY() + widget.getHeight() <= CONTENT_TOP) continue;
+            if (click(widget, mouseX, mouseY, button)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        scrollBy((int) (-amount * ROW * 3));
+        return true;
+    }
+
+    private boolean click(ClickableWidget widget, double mouseX, double mouseY, int button) {
+        if (!widget.mouseClicked(mouseX, mouseY, button)) return false;
+        setFocused(widget);
+        if (button == 0) setDragging(true);
+        return true;
     }
 
     private void done() {
@@ -171,13 +201,18 @@ public final class ObserverConfigScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         MinecraftClient client = MinecraftClient.getInstance();
+        int bottom = height - FOOTER_HEIGHT;
+        // Content is clipped to the scroll region so it cannot draw over the title or the bottom buttons.
+        context.enableScissor(0, CONTENT_TOP, width, bottom);
         for (int i = 0; i < widgets.size(); i++) {
+            ClickableWidget widget = widgets.get(i);
             String label = labels.get(i);
             if (label != null) {
-                ClickableWidget widget = widgets.get(i);
                 context.drawText(client.textRenderer, label, PAD, widget.getY() + 6, 0xFFA0A0A0, true);
             }
+            widget.render(context, mouseX, mouseY, delta);
         }
+        context.disableScissor();
     }
 
     @Override
