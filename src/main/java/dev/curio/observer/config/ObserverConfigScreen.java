@@ -2,8 +2,11 @@ package dev.curio.observer.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -12,79 +15,100 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
-/** In-game settings screen: RCON details, feature toggles and the HUD panels. Replaces hand-editing the JSON. */
+/** In-game connection settings, feature toggles and HUD panels. */
 public final class ObserverConfigScreen extends Screen {
     private static final int PAD = 10;
     private static final int ROW = 24;
-    private static final int LABEL_W = 120;
+    private static final int LABEL_W = 138;
     private static final int FIELD_W = 150;
     private static final int CONTENT_TOP = 32;
-    private static final int FOOTER_HEIGHT = 44;
+    private static final int FOOTER_HEIGHT = 56;
 
     private final Screen parent;
     private final ObserverConfig config;
     private final Runnable onSave;
+    private final Supplier<Text> connectionStatus;
 
     private final List<ClickableWidget> widgets = new ArrayList<>();
     private final List<String> labels = new ArrayList<>();
-    private TextFieldWidget hostField, portField, passwordField, pollField, hudScaleField, gammaField;
+    private final List<Runnable> refreshLabels = new ArrayList<>();
+    private final Map<String, String> editedText = new HashMap<>();
+    private TextFieldWidget feedUrlField, hostField, portField, passwordField, pollField, hudScaleField, gammaField;
+    private TextFieldWidget targetField, observeIntervalField;
     private ButtonWidget doneButton, upButton, downButton;
     private int scroll;
 
-    private boolean rconEnabled, hudEnabled, autoCamera, brighten;
-    private boolean vitals, inventory, view, hands;
+    private boolean feedEnabled, rconEnabled, hudEnabled, autoCamera, brighten;
+    private boolean vitals, inventory, containers, view, hands;
+    private boolean autoObserve;
+    private String language;
 
-    public ObserverConfigScreen(Screen parent, ObserverConfig config, Runnable onSave) {
-        super(Text.translatable("curio-observer.config.title"));
+    public ObserverConfigScreen(Screen parent, ObserverConfig config, Runnable onSave, Supplier<Text> connectionStatus) {
+        super(ObserverText.text("curio-observer.config.title"));
         this.parent = parent;
         this.config = config;
         this.onSave = onSave;
+        this.connectionStatus = connectionStatus;
+        this.feedEnabled = config.feedEnabled;
         this.rconEnabled = config.rconEnabled;
         this.hudEnabled = config.hudEnabled;
         this.autoCamera = Boolean.TRUE.equals(config.autoCamera);
         this.brighten = Boolean.TRUE.equals(config.brighten);
         this.vitals = config.visible("vitals");
         this.inventory = config.visible("inventory");
+        this.containers = config.visible("containers");
         this.view = config.visible("view");
         this.hands = config.visible("hands");
+        this.autoObserve = config.autoObserve;
+        this.language = config.language;
     }
 
     @Override
     protected void init() {
         widgets.clear();
         labels.clear();
+        refreshLabels.clear();
 
-        toggle("RCON enabled", () -> rconEnabled, v -> rconEnabled = v);
-        hostField = textField("RCON host", 256, null);
-        portField = textField("RCON port", 5, "[0-9]*");
-        passwordField = textField("RCON password", 256, null);
-        pollField = textField("RCON poll (s)", 2, "[0-9]*");
+        ButtonWidget languageButton = ButtonWidget.builder(languageLabel(), button -> {
+            language = switch (language) { case "auto" -> "en_us"; case "en_us" -> "zh_cn"; default -> "auto"; };
+            ObserverText.setLanguage(language);
+            refreshLabels.forEach(Runnable::run);
+        }).dimensions(0, 0, 100, 20).build();
+        widgets.add(languageButton);
+        labels.add(null);
+        refreshLabels.add(() -> languageButton.setMessage(languageLabel()));
 
-        toggle("HUD enabled", () -> hudEnabled, v -> hudEnabled = v);
-        hudScaleField = textField("HUD scale", 5, "[0-9.]*");
-        gammaField = textField("Gamma", 5, "[0-9.]*");
+        targetField = textField("default_target", 16, "[A-Za-z0-9_]*", config.defaultTarget);
+        toggle("auto_observe", () -> autoObserve, value -> autoObserve = value);
+        observeIntervalField = textField("observe_interval", 3, "[0-9]*", Integer.toString(config.autoObserveSeconds));
+        toggle("feed_enabled", () -> feedEnabled, v -> feedEnabled = v);
+        feedUrlField = textField("feed_url", 2048, null, config.feedUrl);
+        toggle("rcon_enabled", () -> rconEnabled, v -> rconEnabled = v);
+        hostField = textField("rcon_host", 256, null, config.rconHost);
+        portField = textField("rcon_port", 5, "[0-9]*", Integer.toString(config.rconPort));
+        passwordField = textField("rcon_password", 256, null, config.rconPassword == null ? "" : config.rconPassword);
+        pollField = textField("rcon_poll", 2, "[0-9]*", Integer.toString(config.rconPollSeconds));
 
-        toggle("Auto camera", () -> autoCamera, v -> autoCamera = v);
-        toggle("Brighten dark areas", () -> brighten, v -> brighten = v);
+        toggle("hud_enabled", () -> hudEnabled, v -> hudEnabled = v);
+        hudScaleField = textField("hud_scale", 5, "[0-9.]*", Double.toString(config.hudScale));
+        gammaField = textField("gamma", 5, "[0-9.]*", Double.toString(config.gamma));
 
-        toggle("Show vitals", () -> vitals, v -> vitals = v);
-        toggle("Show inventory", () -> inventory, v -> inventory = v);
-        toggle("Show view status", () -> view, v -> view = v);
-        toggle("Show hands", () -> hands, v -> hands = v);
+        toggle("auto_camera", () -> autoCamera, v -> autoCamera = v);
+        toggle("brighten", () -> brighten, v -> brighten = v);
 
-        hostField.setText(config.rconHost == null ? "" : config.rconHost);
-        portField.setText(Integer.toString(config.rconPort));
-        passwordField.setText(config.rconPassword == null ? "" : config.rconPassword);
-        pollField.setText(Integer.toString(config.rconPollSeconds));
-        hudScaleField.setText(Double.toString(config.hudScale));
-        gammaField.setText(Double.toString(config.gamma));
+        toggle("show_vitals", () -> vitals, v -> vitals = v);
+        toggle("show_inventory", () -> inventory, v -> inventory = v);
+        toggle("show_containers", () -> containers, v -> containers = v);
+        toggle("show_view", () -> view, v -> view = v);
+        toggle("show_hands", () -> hands, v -> hands = v);
 
         // Content is drawn and clipped manually so it stays inside the scroll region; the bottom
         // buttons remain drawable children and are rendered by the parent on top.
         for (ClickableWidget widget : widgets) addSelectableChild(widget);
 
-        doneButton = ButtonWidget.builder(Text.translatable("gui.done"), b -> done())
+        doneButton = ButtonWidget.builder(ObserverText.text("curio-observer.config.done"), b -> done())
                 .dimensions(0, 0, 120, 20).build();
+        refreshLabels.add(() -> doneButton.setMessage(ObserverText.text("curio-observer.config.done")));
         upButton = ButtonWidget.builder(Text.literal("▲"), b -> scrollBy(-ROW * 3)).dimensions(0, 0, 40, 20).build();
         downButton = ButtonWidget.builder(Text.literal("▼"), b -> scrollBy(ROW * 3)).dimensions(0, 0, 40, 20).build();
         addDrawableChild(doneButton);
@@ -101,19 +125,29 @@ public final class ObserverConfigScreen extends Screen {
         }).dimensions(0, 0, 100, 20).build();
         widgets.add(button);
         labels.add(null);
+        refreshLabels.add(() -> button.setMessage(toggleLabel(label, getter.getAsBoolean())));
     }
 
-    private TextFieldWidget textField(String label, int maxLength, String predicate) {
-        TextFieldWidget field = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, FIELD_W, 20, Text.literal(label));
+    private TextFieldWidget textField(String label, int maxLength, String predicate, String initial) {
+        TextFieldWidget field = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, FIELD_W, 20,
+                ObserverText.text("curio-observer.config." + label));
         field.setMaxLength(maxLength);
         if (predicate != null) field.setTextPredicate(value -> value.matches(predicate));
+        field.setText(editedText.getOrDefault(label, initial));
+        field.setChangedListener(value -> editedText.put(label, value));
         widgets.add(field);
         labels.add(label);
+        refreshLabels.add(() -> field.setMessage(ObserverText.text("curio-observer.config." + label)));
         return field;
     }
 
     private static Text toggleLabel(String label, boolean on) {
-        return Text.literal(label + ": " + (on ? "On" : "Off"));
+        return ObserverText.text("curio-observer.config.toggle", ObserverText.text("curio-observer.config." + label),
+                ObserverText.text(on ? "curio-observer.config.on" : "curio-observer.config.off"));
+    }
+
+    private Text languageLabel() {
+        return ObserverText.text("curio-observer.config.language", ObserverText.text("curio-observer.config.language." + language));
     }
 
     private void reposition() {
@@ -125,7 +159,7 @@ public final class ObserverConfigScreen extends Screen {
         for (int i = 0; i < widgets.size(); i++) {
             ClickableWidget widget = widgets.get(i);
             if (labels.get(i) == null) { widget.setX(PAD); widget.setWidth(width - PAD * 2); }
-            else { widget.setX(PAD + LABEL_W); widget.setWidth(FIELD_W); }
+            else { widget.setX(PAD + LABEL_W); widget.setWidth(Math.max(40, width - PAD * 2 - LABEL_W)); }
             widget.setY(y);
             y += ROW;
         }
@@ -170,12 +204,19 @@ public final class ObserverConfigScreen extends Screen {
     }
 
     private void done() {
+        config.defaultTarget = targetField.getText();
+        config.autoObserve = autoObserve;
+        config.autoObserveSeconds = parseInt(observeIntervalField.getText(), 5);
+        config.language = language;
+        config.feedEnabled = feedEnabled;
+        config.feedUrl = feedUrlField.getText().trim();
         config.rconEnabled = rconEnabled;
         config.hudEnabled = hudEnabled;
         config.autoCamera = autoCamera;
         config.brighten = brighten;
         config.panel("vitals").visible = vitals;
         config.panel("inventory").visible = inventory;
+        config.panel("containers").visible = containers;
         config.panel("view").visible = view;
         config.panel("hands").visible = hands;
         config.rconHost = hostField.getText().trim();
@@ -185,6 +226,7 @@ public final class ObserverConfigScreen extends Screen {
         config.hudScale = parseDouble(hudScaleField.getText(), 1.0);
         config.gamma = parseDouble(gammaField.getText(), 3.0);
         config.normalize();
+        ObserverText.setLanguage(config.language);
         onSave.run();
         MinecraftClient.getInstance().setScreen(parent);
     }
@@ -201,6 +243,9 @@ public final class ObserverConfigScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         MinecraftClient client = MinecraftClient.getInstance();
+        context.drawCenteredTextWithShadow(client.textRenderer, getTitle(), width / 2, 4, 0xFFFFFFFF);
+        context.drawText(client.textRenderer, client.textRenderer.trimToWidth(connectionStatus.get().getString(), width - PAD * 2),
+                PAD, 18, 0xFFE0E0E0, true);
         int bottom = height - FOOTER_HEIGHT;
         // Content is clipped to the scroll region so it cannot draw over the title or the bottom buttons.
         context.enableScissor(0, CONTENT_TOP, width, bottom);
@@ -208,12 +253,23 @@ public final class ObserverConfigScreen extends Screen {
             ClickableWidget widget = widgets.get(i);
             String label = labels.get(i);
             if (label != null) {
-                context.drawText(client.textRenderer, label, PAD, widget.getY() + 6, 0xFFA0A0A0, true);
+                String caption = ObserverText.text("curio-observer.config." + label).getString();
+                context.drawText(client.textRenderer, client.textRenderer.trimToWidth(caption, LABEL_W - 4),
+                        PAD, widget.getY() + 6, 0xFFA0A0A0, true);
             }
             widget.render(context, mouseX, mouseY, delta);
         }
         context.disableScissor();
+        if (autoObserve) context.drawText(client.textRenderer,
+                client.textRenderer.trimToWidth(ObserverText.text("curio-observer.config.observe_hint").getString(), width - PAD * 2),
+                PAD, height - 39, 0xFFFFCC77, true);
     }
+
+    @Override
+    public Text getTitle() { return ObserverText.text("curio-observer.config.title"); }
+
+    @Override
+    public void removed() { ObserverText.setLanguage(config.language); }
 
     @Override
     public boolean shouldPause() { return false; }

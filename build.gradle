@@ -43,7 +43,10 @@ java {
     withSourcesJar()
 }
 
-test { useJUnitPlatform() }
+test {
+    useJUnitPlatform()
+    inputs.file('integrations/mineflayer/fixtures/generated-events.json').withPropertyName('mineflayerContract')
+}
 
 // Exercise the published bytecode too: named development classes alone do not prove release compatibility.
 tasks.register('releaseMixinTest', Test) {

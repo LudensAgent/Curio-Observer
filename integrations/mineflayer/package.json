@@ -1,0 +1,11 @@
+{
+  "name": "@curio-observer/mineflayer",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Read-only Mineflayer container telemetry for Curio Observer",
+  "license": "MIT",
+  "types": "./index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "import": "./index.js" } },
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test test/*.test.js" }
+}

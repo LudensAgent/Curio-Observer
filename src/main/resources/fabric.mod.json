@@ -3,7 +3,7 @@
   "id": "curio-observer",
   "version": "${version}",
   "name": "Curio Observer",
-  "description": "Client-only spectator HUD with adaptive camera and dark-area brightening. No feed, dashboard or server mod required.",
+  "description": "Client-side Mineflayer spectator HUD: live containers, crafting, trading, inventory, adaptive camera and dark-area brightening. Includes a documented bot event bridge; no server mod required.",
   "environment": "client",
   "entrypoints": { "client": ["dev.curio.observer.CurioObserverClient"] },
   "mixins": ["curio-observer.mixins.json"],

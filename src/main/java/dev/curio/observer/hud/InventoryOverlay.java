@@ -1,5 +1,7 @@
 package dev.curio.observer.hud;
 
+import dev.curio.observer.config.ObserverText;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.curio.observer.config.ObserverConfig;
 import dev.curio.observer.model.Protocol;
@@ -8,7 +10,6 @@ import dev.curio.observer.state.ItemCodec;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import java.util.List;
 
 /** The bot's complete inventory (armor, offhand, 27 storage slots and the hotbar) as a read-only panel. */
@@ -48,8 +49,8 @@ public final class InventoryOverlay {
             for (Protocol.ItemData item : state.main()) if (item != null) used++;
             for (Protocol.ItemData item : state.hotbar()) if (item != null) used++;
             String bot = state.hello() == null ? "Curio" : state.hello().bot();
-            String title = Text.translatable("curio-observer.inventory.title", bot).getString();
-            String count = Text.translatable("curio-observer.inventory.used", used, 36).getString();
+            String title = ObserverText.text("curio-observer.inventory.title", bot).getString();
+            String count = ObserverText.text("curio-observer.inventory.used", used, 36).getString();
             int countWidth = renderer.getWidth(count);
             context.drawText(renderer, HudText.clip(renderer, title, WIDTH - PADDING * 3 - countWidth), PADDING, 4, 0xFFE2EEE6, true);
             context.drawText(renderer, count, WIDTH - PADDING - countWidth, 4, 0xFFA8B9AE, false);

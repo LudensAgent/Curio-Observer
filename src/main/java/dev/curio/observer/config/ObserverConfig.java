@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,16 @@ import org.slf4j.LoggerFactory;
  */
 public final class ObserverConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final String DEFAULT_FEED_URL = "http://127.0.0.1:3000/api/observer/stream";
+    /** Read-only events from the actual observed Mineflayer bot. */
+    public boolean feedEnabled = true;
+    public String feedUrl = DEFAULT_FEED_URL;
+    /** Empty until the user chooses the bot to follow automatically. */
+    public String defaultTarget = "";
+    public boolean autoObserve = false;
+    public int autoObserveSeconds = 5;
+    /** Mod UI language; auto follows Minecraft without changing its global language. */
+    public String language = "auto";
     public boolean hudEnabled = true;
     public double hudScale = 1.0;
     /** Text cards have their own multiplier so compact information does not shrink item slots or vital bars. */
@@ -70,6 +81,12 @@ public final class ObserverConfig {
     }
 
     public void normalize() {
+        defaultTarget = defaultTarget == null ? "" : defaultTarget.trim();
+        if (!defaultTarget.matches("[A-Za-z0-9_]{1,16}")) defaultTarget = "";
+        autoObserveSeconds = Math.max(1, Math.min(300, autoObserveSeconds));
+        if (language == null || !Set.of("auto", "en_us", "zh_cn").contains(language)) language = "auto";
+        if (feedUrl == null || feedUrl.isBlank()) feedUrl = DEFAULT_FEED_URL;
+        else feedUrl = feedUrl.trim();
         hudScale = Double.isFinite(hudScale) ? Math.max(0.5, Math.min(3, hudScale)) : 1.0;
         infoScale = Double.isFinite(infoScale) ? Math.max(0.5, Math.min(1.5, infoScale)) : 0.7;
         broadcastDistance = Double.isFinite(broadcastDistance) ? Math.max(1.5, Math.min(6, broadcastDistance)) : 3.0;

@@ -2,6 +2,9 @@
 .gradle/
 build/
 out/
+node_modules/
+integrations/mineflayer-test/config.local.json
+integrations/mineflayer-test/.auth/
 
 # ---- IDE ----
 # IntelliJ IDEA

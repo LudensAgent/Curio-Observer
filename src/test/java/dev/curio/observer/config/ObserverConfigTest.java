@@ -77,4 +77,69 @@ class ObserverConfigTest {
         assertFalse(loaded.autoCamera);
         assertTrue(loaded.brighten, "The two switches persist separately");
     }
+
+    @Test void feedConfigurationAndContainerVisibilityPersistWithoutRemovingRcon() throws Exception {
+        Path path = directory.resolve("feed.json");
+        Files.writeString(path, "{\"rconEnabled\":true,\"rconHost\":\"minecraft.local\",\"feedUrl\":\"  https://bot.example/observer  \"}");
+        ObserverConfig config = ObserverConfig.load(path);
+        assertTrue(config.feedEnabled);
+        assertTrue(config.rconEnabled);
+        assertEquals("https://bot.example/observer", config.feedUrl);
+        assertTrue(config.visible("containers"));
+        config.panel("containers").visible = false;
+        config.feedEnabled = false;
+        config.saveAsync(path);
+        ObserverConfig.awaitPendingSaves();
+        ObserverConfig loaded = ObserverConfig.load(path);
+        assertFalse(loaded.feedEnabled);
+        assertFalse(loaded.visible("containers"));
+        assertEquals("minecraft.local", loaded.rconHost);
+        loaded.feedUrl = " ";
+        loaded.normalize();
+        assertEquals(ObserverConfig.DEFAULT_FEED_URL, loaded.feedUrl);
+    }
+
+    @Test void observationAndLanguageDefaultsStayOptInAndValidateNames() {
+        ObserverConfig config = new ObserverConfig();
+        config.normalize();
+        assertFalse(config.autoObserve);
+        assertEquals("", config.defaultTarget);
+        assertEquals(5, config.autoObserveSeconds);
+        assertEquals("auto", config.language);
+        config.defaultTarget = "  Alex  ";
+        config.autoObserveSeconds = 999;
+        config.language = "zh_cn";
+        config.normalize();
+        assertEquals("Alex", config.defaultTarget);
+        assertEquals(300, config.autoObserveSeconds);
+        assertEquals("zh_cn", config.language);
+        config.defaultTarget = "Alex @a";
+        config.autoObserveSeconds = 0;
+        config.language = "unknown";
+        config.normalize();
+        assertEquals("", config.defaultTarget);
+        assertEquals(1, config.autoObserveSeconds);
+        assertEquals("auto", config.language);
+        config.defaultTarget = null;
+        config.language = null;
+        config.normalize();
+        assertEquals("", config.defaultTarget);
+        assertEquals("auto", config.language);
+    }
+
+    @Test void savesDefaultTargetObservationIntervalAndExplicitLanguage() {
+        Path path = directory.resolve("observe.json");
+        ObserverConfig config = new ObserverConfig();
+        config.defaultTarget = "Alex";
+        config.autoObserve = true;
+        config.autoObserveSeconds = 7;
+        config.language = "en_us";
+        config.saveAsync(path);
+        ObserverConfig.awaitPendingSaves();
+        ObserverConfig loaded = ObserverConfig.load(path);
+        assertEquals("Alex", loaded.defaultTarget);
+        assertTrue(loaded.autoObserve);
+        assertEquals(7, loaded.autoObserveSeconds);
+        assertEquals("en_us", loaded.language);
+    }
 }

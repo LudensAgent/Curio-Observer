@@ -1,12 +1,13 @@
 package dev.curio.observer.hud;
 
+import dev.curio.observer.config.ObserverText;
+
 import dev.curio.observer.config.ObserverConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
 
 /** A small card telling viewers which presentation aids are on: adaptive camera and dark-area brightening. */
 public final class ViewModeOverlay {
@@ -24,15 +25,15 @@ public final class ViewModeOverlay {
     static List<Line> lines(Status s) {
         List<Line> lines = new ArrayList<>();
         if (s.cameraOn()) {
-            String state = !s.cameraActive() ? Text.translatable("curio-observer.view.standby").getString()
-                    : Text.translatable(s.thirdPerson() ? "curio-observer.view.third" : "curio-observer.view.first").getString();
-            lines.add(new Line(Text.translatable("curio-observer.view.camera", state).getString(), s.cameraActive() ? 0x8FD6B3 : 0xA8B9AE));
+            String state = !s.cameraActive() ? ObserverText.text("curio-observer.view.standby").getString()
+                    : ObserverText.text(s.thirdPerson() ? "curio-observer.view.third" : "curio-observer.view.first").getString();
+            lines.add(new Line(ObserverText.text("curio-observer.view.camera", state).getString(), s.cameraActive() ? 0x8FD6B3 : 0xA8B9AE));
         }
         if (s.brightenOn()) {
             String gamma = String.format(Locale.ROOT, "%.1f", s.gamma());
-            String text = Text.translatable("curio-observer.view.brighten", gamma).getString();
-            if (!s.brightenActive()) text += Text.translatable("curio-observer.view.paused").getString();
-            else if (s.shaders()) text += Text.translatable("curio-observer.view.shaders").getString();
+            String text = ObserverText.text("curio-observer.view.brighten", gamma).getString();
+            if (!s.brightenActive()) text += ObserverText.text("curio-observer.view.paused").getString();
+            else if (s.shaders()) text += ObserverText.text("curio-observer.view.shaders").getString();
             lines.add(new Line(text, s.brightenActive() ? 0xFFE39A : 0xA8B9AE));
         }
         return lines;
