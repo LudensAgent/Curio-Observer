@@ -19,6 +19,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.glfw.GLFW;
 import java.nio.file.Path;
+import java.util.UUID;
 
 /**
  * Client-only spectator HUD. No packets are sent to the Minecraft server; the HUD, camera and lighting are
@@ -36,9 +37,12 @@ public final class CurioObserverClient implements ClientModInitializer {
     private static Path configPath;
     private static RconLink rcon;
     private static volatile String rconTarget;
+    private static UUID spectatedUuid;
     private static String spectatedName;
     private static long lastReobserveAt;
+    private static int reobserveAttempts;
     private static final long REOBSERVE_COOLDOWN_MS = 2_000;
+    private static final int REOBSERVE_MAX_ATTEMPTS = 3;
     private static KeyBinding hudKey;
     private static KeyBinding brightenKey;
     private static KeyBinding cameraKey;
@@ -117,25 +121,34 @@ public final class CurioObserverClient implements ClientModInitializer {
     }
 
     /**
-     * Keeps following a spectated player across a dimension change. The camera still points at the
-     * removed entity after the target leaves this world, so once it is removed we ask the server to
-     * move the observer along and re-attach the camera ({@code spectate} teleports across dimensions).
+     * Keeps following a spectated player across a dimension change. After the target leaves this world
+     * the camera reverts to the observer, so once that happens we ask the server to move the observer
+     * along and re-attach the camera ({@code spectate} teleports across dimensions). A same-world detach
+     * leaves the target present and is treated as intentional.
      */
     private static void trackSpectate(PlayerEntity target) {
-        if (target == null) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (target != null && !target.isRemoved()) {
+            spectatedUuid = target.getUuid();
+            spectatedName = target.getGameProfile().getName();
+            reobserveAttempts = 0;
+            return;
+        }
+        if (spectatedUuid == null || spectatedName == null || client.player == null
+                || !client.player.isSpectator() || client.getNetworkHandler() == null || client.world == null) {
+            spectatedUuid = null;
             spectatedName = null;
             return;
         }
-        if (!target.isRemoved()) {
-            spectatedName = target.getGameProfile().getName();
+        if (client.world.getPlayerByUuid(spectatedUuid) != null || reobserveAttempts >= REOBSERVE_MAX_ATTEMPTS) {
+            spectatedUuid = null;
+            spectatedName = null;
             return;
         }
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (spectatedName == null || client.player == null || !client.player.isSpectator()
-                || client.getNetworkHandler() == null) return;
         long now = System.currentTimeMillis();
         if (now - lastReobserveAt >= REOBSERVE_COOLDOWN_MS) {
             lastReobserveAt = now;
+            reobserveAttempts++;
             client.getNetworkHandler().sendChatCommand("spectate " + spectatedName);
         }
     }
