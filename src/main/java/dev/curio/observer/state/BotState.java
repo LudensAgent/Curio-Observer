@@ -29,12 +29,24 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Actions actio
         Protocol.Hello hello = new Protocol.Hello(Protocol.VERSION, name, "1.20.1", "pure");
         float health = player.getHealth();
         float absorption = player.getAbsorptionAmount();
-        Protocol.State state = rcon != null && rcon.forPlayer(name) && rcon.fresh(System.currentTimeMillis())
+        long now = System.currentTimeMillis();
+        Protocol.State state = rcon != null && rcon.forPlayer(name) && rcon.fresh(now)
                 ? new Protocol.State(health, absorption, rcon.food(), rcon.saturation(), 20,
                         new Protocol.Xp(rcon.xpLevel(), rcon.xpProgress()),
                         rcon.armor(), rcon.hotbar(), rcon.offhand(), rcon.selected(), rcon.main())
                 : clientState(player, health, absorption);
-        return new BotState(hello, state, Actions.empty(), true);
+        return new BotState(hello, state, actionsOf(player, now), true);
+    }
+
+    /** Reads the spectated player's swing/eat/use timings that drive the first-person hand pass. */
+    private static Actions actionsOf(PlayerEntity player, long now) {
+        float swingProgress = player.getHandSwingProgress(1.0F);
+        long swingAt = swingProgress > 0.0F && swingProgress < 1.0F ? now - (long) (swingProgress * 350.0F) : 0L;
+        boolean using = player.isUsingItem();
+        boolean eating = using && player.getActiveItem().isFood();
+        long changedAt = eating ? now - player.getItemUseTime() * 50L : 0L;
+        long useAt = using ? now : 0L;
+        return new Actions("", changedAt, swingAt, eating, useAt);
     }
 
     private static Protocol.State clientState(PlayerEntity player, float health, float absorption) {
