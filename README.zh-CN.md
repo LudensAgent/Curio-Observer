@@ -1,6 +1,14 @@
 # Curio Observer
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<p>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+  <a href="https://github.com/LudensAgent/Curio-Observer/releases"><img src="https://img.shields.io/github/v/release/LudensAgent/Curio-Observer?cacheSeconds=86400" alt="最新版本"></a>
+  <img src="https://img.shields.io/badge/minecraft-1.20.1-62B47A.svg" alt="Minecraft 版本">
+  <img src="https://img.shields.io/badge/fabric_loader-0.18.5+-DBBE5B.svg" alt="Fabric Loader">
+  <img src="https://img.shields.io/badge/java-17+-ED8B00.svg" alt="Java 版本">
+  <a href="https://github.com/LudensAgent/Curio-Observer/actions/workflows/build.yml"><img src="https://github.com/LudensAgent/Curio-Observer/actions/workflows/build.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/LudensAgent/Curio-Observer/releases"><img src="https://img.shields.io/github/downloads/LudensAgent/Curio-Observer/total?cacheSeconds=86400" alt="GitHub 下载量"></a>
+</p>
 
 [English](README.md) | 简体中文
 
