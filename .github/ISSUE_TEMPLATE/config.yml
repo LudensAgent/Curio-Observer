@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: How the bot bridge works
+    url: https://github.com/LudensAgent/Curio-Observer/blob/main/docs/mineflayer-protocol.md
+    about: Protocol reference and reconnect snapshots before you file a bridge issue.
+  - name: Setup and usage
+    url: https://github.com/LudensAgent/Curio-Observer#readme
+    about: Installation, commands and HUD features.

@@ -1,0 +1,61 @@
+name: Bridge / integration issue
+description: The Mineflayer bridge, SSE feed, or RCON fallback does not line up with the client.
+title: "[Bridge] "
+labels: ["integration"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when the client renders something, but what it renders comes from the bot side —
+        missing HUD data, a feed that attaches to the wrong player, or protocol mismatches.
+
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Which data path
+      options:
+        - Mineflayer bridge (HTTP SSE)
+        - RCON fallback
+        - Both / unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: What the client shows vs. what the bot actually has
+      description: Concrete values help — e.g. "bot has 12 oak planks, HUD shows 8 and never updates".
+    validations:
+      required: true
+
+  - type: textarea
+    id: bridge-setup
+    attributes:
+      label: Bridge setup
+      description: How you start it, node version, bot version, and any non-default flags.
+      value: |
+        - Bridge command:
+        - Node version:
+        - mineflayer version:
+        - Bot name:
+        - Server type/version:
+    validations:
+      required: true
+
+  - type: textarea
+    id: protocol
+    attributes:
+      label: Protocol details
+      description: If you know the event or payload involved, paste the relevant JSON. See `docs/mineflayer-protocol.md`.
+      render: json
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Bridge stdout, plus the client log around the moment it went wrong.
+      render: text
+    validations:
+      required: false

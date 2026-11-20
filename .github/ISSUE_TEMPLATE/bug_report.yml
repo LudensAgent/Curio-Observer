@@ -1,0 +1,93 @@
+name: Bug report
+description: Something in the HUD, camera, or container overlay behaves wrong.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Curio Observer is a **client-side** mod, so environment details change a lot of outcomes — please fill them in.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect instead?
+      placeholder: "The crafting grid shows the wrong result count when the bot crafts in batches."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps beat prose. Include the command you ran on the bot side if relevant.
+      placeholder: |
+        1. Start the bridge with `node integrations/mineflayer/bridge.js`
+        2. Run `/spectate bot1` on the client
+        3. Open a workbench while the bot crafts 8 planks
+        4. HUD shows 4 for a moment, then sticks
+    validations:
+      required: true
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Curio Observer version
+      description: Release tag or commit SHA (the HUD shows it, or check Mod Menu).
+      placeholder: "0.4.0 / 1a2b3c4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Which part of the mod
+      options:
+        - Spectator HUD (vitals / inventory / hands)
+        - Container overlay (crafting / chest / furnace / villager)
+        - Auto camera
+        - Dark-area brightening
+        - Bot bridge / protocol
+        - Settings screen
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Minecraft, Fabric Loader, Fabric API, Java, OS, and the other mods you run alongside it.
+      value: |
+        - Minecraft: 1.20.1
+        - Fabric Loader:
+        - Fabric API:
+        - Java:
+        - OS:
+        - Other mods:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and screenshots
+      description: Paste `latest.log` (and `crash-report` if present) between the markers, or drag files in. Redact server addresses if needed.
+      render: text
+      placeholder: |
+        ```
+        paste logs here
+        ```
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This is not a request for a server-side mod or plugin (Curio Observer is client-only by design).
+          required: true
