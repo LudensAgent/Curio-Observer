@@ -1,0 +1,94 @@
+name: 问题反馈（中文）
+description: HUD、镜头、容器叠加或桥接出现异常时用这个。
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。Curio Observer 是**纯客户端** mod，环境细节影响很大，请尽量填全。
+        英文反馈请用 [Bug report](?template=bug_report.yml)。
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么
+      description: 你看到的现象，以及你期望的结果。
+      placeholder: "bot 一次合成 8 个木板时，合成格里的数量先闪成 4，然后一直不变。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 分条写，尽量带上 bot 那边跑的命令。
+      placeholder: |
+        1. 启动桥接：node integrations/mineflayer/bridge.js
+        2. 客户端执行 /spectate bot1
+        3. bot 合成 8 个木板时打开工作台
+        4. 数量显示错误且不刷新
+    validations:
+      required: true
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Curio Observer 版本
+      description: 发行版标签或提交哈希（Mod 菜单里能看到）。
+      placeholder: "0.4.0 / 1a2b3c4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: 出问题的部分
+      options:
+        - 观众 HUD（生命/护甲/物品栏/手持）
+        - 容器叠加（合成/箱子/熔炉/村民交易）
+        - 自动镜头
+        - 暗处提亮
+        - bot 桥接 / 协议
+        - 设置界面
+        - 其他 / 不确定
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境
+      description: 附带的其他 mod 尤其重要，很多显示问题来自冲突。
+      value: |
+        - Minecraft：1.20.1
+        - Fabric Loader：
+        - Fabric API：
+        - Java：
+        - 操作系统：
+        - 同时安装的其他 mod：
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志与截图
+      description: 把 `latest.log`（有 `crash-report` 也一并）贴在下面，或直接拖文件进来。涉及时可抹掉服务器地址。
+      render: text
+      placeholder: |
+        ```
+        把日志贴在这里
+        ```
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我搜过已有 issue，这不是重复问题。
+          required: true
+        - label: 我知道 Curio Observer 是纯客户端 mod，不是在要服务端插件或 mod。
+          required: true

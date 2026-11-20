@@ -1,0 +1,59 @@
+name: Feature request
+description: Propose a HUD element, camera behaviour, integration, or quality-of-life change.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Curio Observer stays **client-side and read-only**: it observes, it does not act on the world.
+        Proposals that need server-side code or that would send inventory operations fall outside the project's scope — say so up front if that is the case.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: Describe the viewing situation, not the implementation.
+      placeholder: "While spectating a long mining session I cannot tell which container the bot last touched, so I lose track of its route."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like to see
+      description: Sketch the behaviour. A rough mock is fine — screenshots or ASCII layout welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Including "do nothing" and workarounds you already use.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Where would this live
+      options:
+        - Client HUD (pure rendering, no new data)
+        - Client HUD (needs new data from the bot bridge)
+        - Bot bridge / protocol
+        - Settings and configuration
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Project constraints
+      options:
+        - label: This does not require a server plugin or server-side mod.
+          required: true
+        - label: This does not send inventory or world operations through the observer.
+          required: true
