@@ -1,0 +1,345 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 924 720" width="924" height="720" role="img" aria-label="Curio Observer 模组工作原理图">
+  <style>
+    :root {
+      --canvas-bg: #ffffff;
+      --canvas-border: #e2e8f0;
+      --fg: #0f172a;
+      --muted: #475569;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --group-bg: #f8fafc;
+      --pill-muted-bg: #f1f5f9;
+      --pill-muted-border: #cbd5e1;
+      --badge-bg: #ffffff;
+      --badge-border: #cbd5e1;
+
+      --server-bg: #f0fdf4;
+      --server-hdr: #dcfce7;
+      --server-border: #86efac;
+      --server-accent: #15803d;
+      --server-line: #16a34a;
+      --server-pill-bg: #dcfce7;
+      --server-pill-border: #86efac;
+
+      --bot-bg: #fffbeb;
+      --bot-hdr: #fef3c7;
+      --bot-border: #fcd34d;
+      --bot-accent: #b45309;
+      --bot-line: #d97706;
+      --bot-pill-bg: #fef3c7;
+      --bot-pill-border: #fcd34d;
+
+      --client-bg: #f0f9ff;
+      --client-hdr: #e0f2fe;
+      --client-border: #93c5fd;
+      --client-accent: #1d4ed8;
+      --client-line: #2563eb;
+      --client-pill-bg: #dbeafe;
+      --client-pill-border: #93c5fd;
+
+      --merge-bg: #eff6ff;
+      --merge-border: #60a5fa;
+      --dashed-bg: #f8fafc;
+      --dashed-border: #94a3b8;
+      --rcon-line: #64748b;
+      --int-line: #3b82f6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas-bg: #0d1117;
+        --canvas-border: #30363d;
+        --fg: #f0f6fc;
+        --muted: #9ca3af;
+        --card-bg: #161b22;
+        --card-border: #30363d;
+        --group-bg: #11161d;
+        --pill-muted-bg: #21262d;
+        --pill-muted-border: #3b434d;
+        --badge-bg: #161b22;
+        --badge-border: #3b434d;
+
+        --server-bg: #0f2018;
+        --server-hdr: #142c20;
+        --server-border: #235c3e;
+        --server-accent: #4ade80;
+        --server-line: #22c55e;
+        --server-pill-bg: #143222;
+        --server-pill-border: #236342;
+
+        --bot-bg: #20180e;
+        --bot-hdr: #2d2111;
+        --bot-border: #784b14;
+        --bot-accent: #fbbf24;
+        --bot-line: #f59e0b;
+        --bot-pill-bg: #322310;
+        --bot-pill-border: #8a5616;
+
+        --client-bg: #0f1726;
+        --client-hdr: #142038;
+        --client-border: #26487a;
+        --client-accent: #60a5fa;
+        --client-line: #3b82f6;
+        --client-pill-bg: #16294a;
+        --client-pill-border: #2c5594;
+
+        --merge-bg: #13223a;
+        --merge-border: #3b82f6;
+        --dashed-bg: #161b22;
+        --dashed-border: #4b5563;
+        --rcon-line: #9ca3af;
+        --int-line: #60a5fa;
+      }
+    }
+
+    text {
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .canvas { fill: var(--canvas-bg); stroke: var(--canvas-border); }
+    .box-server { fill: var(--server-bg); stroke: var(--server-border); }
+    .box-bot { fill: var(--bot-bg); stroke: var(--bot-border); }
+    .box-client { fill: var(--client-bg); stroke: var(--client-border); }
+    .hdr-server { fill: var(--server-hdr); }
+    .hdr-bot { fill: var(--bot-hdr); }
+    .hdr-client { fill: var(--client-hdr); }
+    .subcard { fill: var(--card-bg); stroke: var(--card-border); }
+    .subcard-dashed { fill: var(--dashed-bg); stroke: var(--dashed-border); stroke-dasharray: 4 3; }
+    .subcard-primary { fill: var(--bot-bg); stroke: var(--bot-border); }
+    .subcard-merge { fill: var(--merge-bg); stroke: var(--merge-border); }
+    .subcard-group { fill: var(--group-bg); stroke: var(--card-border); }
+    .mini-card { fill: var(--card-bg); stroke: var(--card-border); }
+
+    .pill-server { fill: var(--server-pill-bg); stroke: var(--server-pill-border); }
+    .pill-bot { fill: var(--bot-pill-bg); stroke: var(--bot-pill-border); }
+    .pill-info { fill: var(--client-pill-bg); stroke: var(--client-pill-border); }
+    .pill-muted { fill: var(--pill-muted-bg); stroke: var(--pill-muted-border); }
+    .badge-bg { fill: var(--badge-bg); stroke: var(--badge-border); }
+    .badge-sse { fill: var(--bot-pill-bg); stroke: var(--bot-border); }
+    .badge-mc { fill: var(--server-pill-bg); stroke: var(--server-border); }
+
+    .t-title { fill: var(--fg); font-size: 15px; font-weight: 700; }
+    .t-card-title { fill: var(--fg); font-size: 13px; font-weight: 650; }
+    .t-body { fill: var(--muted); font-size: 11.5px; font-weight: 450; }
+    .t-small { fill: var(--muted); font-size: 10.8px; font-weight: 450; }
+    .t-strong { fill: var(--fg); font-weight: 650; }
+    .t-pill-server { fill: var(--server-accent); font-size: 11px; font-weight: 600; }
+    .t-pill-bot { fill: var(--bot-accent); font-size: 11px; font-weight: 600; }
+    .t-pill-info { fill: var(--client-accent); font-size: 11px; font-weight: 600; }
+    .t-pill-muted { fill: var(--fg); font-size: 10.8px; font-weight: 600; }
+
+    .dot-server { fill: var(--server-line); }
+    .dot-bot { fill: var(--bot-line); }
+    .dot-client { fill: var(--client-line); }
+
+    .line-mc { stroke: var(--server-line); stroke-width: 1.9; fill: none; }
+    .line-cmd { stroke: var(--client-line); stroke-width: 1.6; stroke-dasharray: 4 3; fill: none; }
+    .line-rcon { stroke: var(--rcon-line); stroke-width: 1.6; stroke-dasharray: 4 3; fill: none; }
+    .line-sse { stroke: var(--bot-line); stroke-width: 2.4; fill: none; }
+    .line-internal { stroke: var(--int-line); stroke-width: 1.6; fill: none; }
+
+    .arr-mc { fill: var(--server-line); }
+    .arr-cmd { fill: var(--client-line); }
+    .arr-rcon { fill: var(--rcon-line); }
+    .arr-sse { fill: var(--bot-line); }
+    .arr-int { fill: var(--int-line); }
+  </style>
+
+  <defs>
+    <marker id="arr-mc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path class="arr-mc" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-cmd" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arr-cmd" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-rcon" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arr-rcon" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-sse" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path class="arr-sse" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-int" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arr-int" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <clipPath id="clip-server"><rect x="14" y="12" width="406" height="200" rx="12" /></clipPath>
+    <clipPath id="clip-bot"><rect x="504" y="12" width="406" height="200" rx="12" /></clipPath>
+    <clipPath id="clip-client"><rect x="14" y="310" width="896" height="398" rx="12" /></clipPath>
+  </defs>
+
+  <!-- Outer rounded canvas for contrast safety on any theme -->
+  <rect class="canvas" x="1" y="1" width="922" height="718" rx="14" stroke-width="1" />
+
+  <!-- ==================== TOP LEFT: MINECRAFT SERVER ==================== -->
+  <g>
+    <rect class="box-server" x="14" y="12" width="406" height="200" rx="12" stroke-width="1.5" />
+    <rect class="hdr-server" x="14" y="12" width="406" height="38" clip-path="url(#clip-server)" />
+    <circle class="dot-server" cx="32" cy="31" r="5" />
+    <text class="t-title" x="45" y="36">Minecraft 服务端</text>
+    <rect class="pill-server" x="278" y="21" width="130" height="21" rx="10.5" stroke-width="1" />
+    <text class="t-pill-server" x="343" y="35.5" text-anchor="middle">原版 · 无需插件/模组</text>
+
+    <rect class="subcard" x="28" y="60" width="378" height="66" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="40" y="79">原版游戏协议（MC 1.20.1）</text>
+    <text class="t-body" x="40" y="98">向旁观者同步世界、实体位置、生命、装备与挥手/进食动作</text>
+    <text class="t-body" x="40" y="115">私有背包与容器交互窗口仅下发给打开它的 Bot 客户端</text>
+
+    <rect class="subcard-dashed" x="28" y="136" width="378" height="64" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="40" y="155">可选 RCON 通道（TCP 25575 · 默认关闭）</text>
+    <text class="t-body" x="40" y="174">响应 <tspan class="mono">data get entity &lt;bot&gt;</tspan>，补全完整背包与饥饿/经验</text>
+    <text class="t-small" x="40" y="190">原版 RCON 无法获取正在打开的箱子、工作台等容器窗口</text>
+  </g>
+
+  <!-- ==================== SERVER <-> BOT CONNECTOR ==================== -->
+  <g>
+    <line class="line-mc" x1="423" y1="92" x2="501" y2="92" marker-start="url(#arr-mc)" marker-end="url(#arr-mc)" />
+    <rect class="badge-mc" x="426" y="63" width="72" height="20" rx="6" stroke-width="1" />
+    <text class="t-pill-server" x="462" y="77" text-anchor="middle">MC 协议</text>
+    <text class="t-small" x="462" y="111" text-anchor="middle">含私有窗口包</text>
+  </g>
+
+  <!-- ==================== TOP RIGHT: BOT PROCESS ==================== -->
+  <g>
+    <rect class="box-bot" x="504" y="12" width="406" height="200" rx="12" stroke-width="1.5" />
+    <rect class="hdr-bot" x="504" y="12" width="406" height="38" clip-path="url(#clip-bot)" />
+    <circle class="dot-bot" cx="522" cy="31" r="5" />
+    <text class="t-title" x="535" y="36">被观察 Bot 进程</text>
+    <rect class="pill-bot" x="762" y="21" width="136" height="21" rx="10.5" stroke-width="1" />
+    <text class="t-pill-bot" x="830" y="35.5" text-anchor="middle">Node.js 22+ · 同进程</text>
+
+    <rect class="subcard" x="518" y="60" width="378" height="58" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="530" y="79">Mineflayer Bot 实例</text>
+    <text class="t-body" x="530" y="98">持有私有背包、当前窗口、工作站进度、附魔选项与村民报价</text>
+
+    <rect class="subcard" x="518" y="128" width="378" height="72" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="530" y="147"><tspan class="mono">integrations/mineflayer</tspan> 桥接（零依赖）</text>
+    <text class="t-body" x="530" y="166">监听 <tspan class="mono">windowOpen / updateSlot / trades</tspan> 与物品 SNBT</text>
+    <text class="t-body" x="530" y="184">可选 <tspan class="mono">actionPacing</tspan> 节拍控制 · 暴露 <tspan class="mono">/api/observer/stream</tspan></text>
+  </g>
+
+  <!-- ==================== MIDDLE TRANSPORT CHANNELS ==================== -->
+  <g>
+    <line class="line-cmd" x1="96" y1="310" x2="96" y2="215" marker-end="url(#arr-cmd)" />
+    <rect class="badge-bg" x="24" y="238" width="144" height="44" rx="7" stroke-width="1" />
+    <text class="t-pill-info" x="96" y="255" text-anchor="middle">可选自动附身命令</text>
+    <text class="t-small mono" x="96" y="272" text-anchor="middle">/spectate &lt;bot&gt;</text>
+
+    <line class="line-mc" x1="240" y1="212" x2="240" y2="307" marker-end="url(#arr-mc)" />
+    <rect class="badge-mc" x="176" y="238" width="128" height="44" rx="7" stroke-width="1" />
+    <text class="t-pill-server" x="240" y="255" text-anchor="middle">原版旁观同步</text>
+    <text class="t-small" x="240" y="272" text-anchor="middle">画面 · 生命 · 装备 · 动作</text>
+
+    <line class="line-rcon" x1="384" y1="212" x2="384" y2="307" marker-end="url(#arr-rcon)" />
+    <rect class="badge-bg" x="318" y="238" width="132" height="44" rx="7" stroke-width="1" />
+    <text class="t-pill-muted" x="384" y="255" text-anchor="middle">可选 RCON 轮询</text>
+    <text class="t-small" x="384" y="272" text-anchor="middle">无 SSE 时回退补全</text>
+
+    <line class="line-sse" x1="707" y1="212" x2="707" y2="307" marker-end="url(#arr-sse)" />
+    <rect class="badge-sse" x="516" y="234" width="382" height="52" rx="8" stroke-width="1.3" />
+    <text class="t-pill-bot" x="707" y="253" text-anchor="middle">主通道：只读 HTTP/HTTPS SSE 事件流（单向，无控制接口）</text>
+    <text class="t-small mono" x="707" y="273" text-anchor="middle">hello · state · window · slot · cursor · pointer · 工作站/交易</text>
+  </g>
+
+  <!-- ==================== BOTTOM: OBSERVER CLIENT ==================== -->
+  <g>
+    <rect class="box-client" x="14" y="310" width="896" height="398" rx="12" stroke-width="1.5" />
+    <rect class="hdr-client" x="14" y="310" width="896" height="38" clip-path="url(#clip-client)" />
+    <circle class="dot-client" cx="32" cy="329" r="5" />
+    <text class="t-title" x="45" y="334">观察者客户端 · Curio Observer</text>
+    <text class="t-body" x="272" y="334">Minecraft 1.20.1 · Fabric 仅客户端模组</text>
+
+    <rect class="pill-muted" x="630" y="319" width="66" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="663" y="333.5" text-anchor="middle"><tspan class="mono">O</tspan> HUD</text>
+    <rect class="pill-muted" x="702" y="319" width="60" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="732" y="333.5" text-anchor="middle"><tspan class="mono">B</tspan> 增亮</text>
+    <rect class="pill-muted" x="768" y="319" width="60" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="798" y="333.5" text-anchor="middle"><tspan class="mono">V</tspan> 相机</text>
+    <rect class="pill-muted" x="834" y="319" width="64" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="866" y="333.5" text-anchor="middle"><tspan class="mono">K</tspan> 设置</text>
+
+    <!-- Tier 1 -->
+    <rect class="subcard" x="28" y="360" width="136" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="38" y="379">自动观察调度</text>
+    <text class="t-small mono" x="38" y="395">AutoObserve</text>
+    <text class="t-small" x="38" y="411">定时附身指定目标</text>
+    <text class="t-small" x="38" y="425">支持跨维度自动重连</text>
+
+    <rect class="subcard" x="174" y="360" width="132" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="184" y="379">原版旁观实体</text>
+    <text class="t-small mono" x="184" y="395">cameraEntity</text>
+    <text class="t-small" x="184" y="411">读取生命与可见装备</text>
+    <text class="t-small" x="184" y="425">挥手 / 进食 / 使用</text>
+
+    <rect class="subcard-dashed" x="316" y="360" width="144" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="326" y="379"><tspan class="mono">RconLink</tspan>（可选）</text>
+    <text class="t-small" x="326" y="396">独立后台线程轮询</text>
+    <text class="t-small" x="326" y="412">解析 SNBT →</text>
+    <text class="t-small mono" x="326" y="426">RconSnapshot</text>
+
+    <rect class="subcard-primary" x="470" y="360" width="426" height="74" rx="8" stroke-width="1.2" />
+    <text class="t-card-title" x="482" y="379"><tspan class="mono">ObserverLink</tspan>（独立后台线程 · 不阻塞渲染）</text>
+    <text class="t-body" x="482" y="398"><tspan class="mono">SseParser</tspan> 逐帧解析 → <tspan class="mono">Protocol v1</tspan> 校验 → 无锁写入原子快照</text>
+    <text class="t-small" x="482" y="417">内置指数退避自动重连 · 45s 心跳超时看门狗 · 断线自动清空容器与光标</text>
+
+    <line class="line-internal" x1="240" y1="434" x2="240" y2="457" marker-end="url(#arr-int)" />
+    <line class="line-rcon" x1="388" y1="434" x2="388" y2="457" marker-end="url(#arr-rcon)" />
+    <line class="line-sse" x1="707" y1="434" x2="707" y2="457" marker-end="url(#arr-sse)" />
+
+    <!-- Tier 2 -->
+    <rect class="subcard" x="28" y="460" width="136" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="38" y="479">配置与双语</text>
+    <text class="t-small mono" x="38" y="495">curio-observer</text>
+    <text class="t-small" x="38" y="511">面板 · 缩放 · Gamma</text>
+    <text class="t-small" x="38" y="525">中/英切换 · 持久化</text>
+
+    <rect class="subcard-merge" x="174" y="460" width="722" height="74" rx="8" stroke-width="1.3" />
+    <text class="t-card-title" x="188" y="480">状态融合与玩家隔离 · <tspan class="mono">BotState.ofSpectator()</tspan></text>
+    <rect class="pill-info" x="514" y="466" width="368" height="21" rx="10.5" stroke-width="1" />
+    <text class="t-pill-info" x="698" y="480.5" text-anchor="middle">严格同名校验：hello.bot == 当前旁观目标（防跨 Bot 串数据）</text>
+
+    <text class="t-small" x="188" y="514" font-weight="600">数据优先级：</text>
+    <rect class="pill-bot" x="258" y="499" width="190" height="23" rx="6" stroke-width="1" />
+    <text class="t-pill-bot" x="353" y="514.5" text-anchor="middle">1. SSE 数据流（容器/NBT/状态）</text>
+    <text class="t-card-title" x="456" y="515" text-anchor="middle">›</text>
+    <rect class="pill-muted" x="464" y="499" width="148" height="23" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="538" y="514.5" text-anchor="middle">2. RCON 背包/饥饿回退</text>
+    <text class="t-card-title" x="620" y="515" text-anchor="middle">›</text>
+    <rect class="pill-server" x="628" y="499" width="132" height="23" rx="6" stroke-width="1" />
+    <text class="t-pill-server" x="694" y="514.5" text-anchor="middle">3. 原版客户端兜底</text>
+    <text class="t-small" x="772" y="514">+ 实时手部动作</text>
+
+    <line class="line-internal" x1="332" y1="534" x2="332" y2="557" marker-end="url(#arr-int)" />
+    <line class="line-internal" x1="726" y1="534" x2="726" y2="557" marker-end="url(#arr-int)" />
+
+    <!-- Tier 3 -->
+    <rect class="subcard-group" x="28" y="560" width="504" height="134" rx="9" stroke-width="1" />
+    <text class="t-card-title" x="42" y="580">HUD 叠加层（<tspan class="mono">HudRenderCallback</tspan> · 替换原版旁观 HUD）</text>
+    <rect class="pill-server" x="412" y="566" width="108" height="19" rx="9.5" stroke-width="1" />
+    <text class="t-pill-server" x="466" y="579" text-anchor="middle">只读 · 不发操作包</text>
+
+    <rect class="mini-card" x="40" y="590" width="234" height="44" rx="6" stroke-width="1" />
+    <text class="t-card-title" x="50" y="607"><tspan class="mono">vitals</tspan> 状态栏 &amp; <tspan class="mono">view</tspan> 提示</text>
+    <text class="t-small" x="50" y="624">生命 / 护甲 / 饥饿 / 氧气 / 经验与辅助状态</text>
+
+    <rect class="mini-card" x="284" y="590" width="236" height="44" rx="6" stroke-width="1" />
+    <text class="t-card-title" x="294" y="607"><tspan class="mono">inventory</tspan> 背包面板</text>
+    <text class="t-small" x="294" y="624">装备 / 27 格背包 / 快捷栏 / 副手（开窗让位）</text>
+
+    <rect class="mini-card" x="40" y="642" width="480" height="42" rx="6" stroke-width="1" />
+    <text class="t-card-title" x="50" y="659"><tspan class="mono">containers</tspan> 实时容器与村民交易（<tspan class="mono">ContainerOverlay</tspan> / <tspan class="mono">MerchantOverlay</tspan>）</text>
+    <text class="t-small" x="50" y="675">工作台 · 箱子/潜影盒 · 熔炉/酿造 · 附魔/铁砧 · 交易报价 · 角色皮肤预览与槽位/携带物动画</text>
+
+    <rect class="subcard-group" x="544" y="560" width="352" height="134" rx="9" stroke-width="1" />
+    <text class="t-card-title" x="558" y="580">画面与视角辅助（Fabric Mixin）</text>
+
+    <rect class="mini-card" x="556" y="590" width="328" height="29" rx="6" stroke-width="1" />
+    <text class="t-small" x="566" y="608.5"><tspan class="mono t-strong">hands</tspan> · 第一人称手持物品与挥手/进食动画</text>
+
+    <rect class="mini-card" x="556" y="624" width="328" height="29" rx="6" stroke-width="1" />
+    <text class="t-small" x="566" y="642.5"><tspan class="mono t-strong">Auto Camera</tspan> · 空间检测 + 平滑第三/第一人称切换</text>
+
+    <rect class="mini-card" x="556" y="658" width="328" height="29" rx="6" stroke-width="1" />
+    <text class="t-small" x="566" y="676.5"><tspan class="mono t-strong">Brighten</tspan> · 光图 Gamma 增亮（保留黑暗/失明效果）</text>
+  </g>
+</svg>

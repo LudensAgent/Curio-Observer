@@ -35,6 +35,10 @@
 - **公开接入协议**：独立 Mineflayer 桥接、数据示例、重连快照与真实物品 NBT。数据仅应用于同名被观察玩家。
 - **可交互验收 bot**：22 个真实 Minecraft 场景覆盖背包、合成、存储、工作站、交易和批量丢弃，支持终端控制与可选操作节奏。
 
+## 工作原理
+
+![Curio Observer 模组工作原理图：原版 Minecraft 服务端、Bot 进程内 HTTP SSE 桥接与 Fabric 观察者客户端](docs/images/architecture.zh-CN.svg)
+
 ## 接入 Mineflayer bot
 
 将 [`integrations/mineflayer`](integrations/mineflayer) 复制到 bot 项目，或作为本地包安装。

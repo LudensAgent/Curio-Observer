@@ -38,6 +38,10 @@ uses `/spectate <bot>` and, when needed, `/gamemode spectator`; the observer nee
 - **Documented bot integration**: a standalone Mineflayer bridge, protocol examples, reconnect snapshots and real item NBT. The feed only applies to the matching spectated player.
 - **Interactive acceptance bot**: 22 real Minecraft scenarios cover inventory, crafting, storage, workstations, trading and batch drops, with terminal controls and optional action pacing.
 
+## How it works
+
+![Curio Observer architecture: vanilla Minecraft server, in-process Mineflayer SSE bridge, and Fabric observer client](docs/images/architecture.svg)
+
 ## Connect your Mineflayer bot
 
 Copy [`integrations/mineflayer`](integrations/mineflayer) into your bot project, or install that directory as a local package. It has no runtime dependencies and does not require another Curio repository. Use Node.js 22+.

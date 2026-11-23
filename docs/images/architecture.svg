@@ -1,0 +1,344 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 924 720" width="924" height="720" role="img" aria-label="Curio Observer Architecture Diagram">
+  <style>
+    :root {
+      --canvas-bg: #ffffff;
+      --canvas-border: #e2e8f0;
+      --fg: #0f172a;
+      --muted: #475569;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --group-bg: #f8fafc;
+      --pill-muted-bg: #f1f5f9;
+      --pill-muted-border: #cbd5e1;
+      --badge-bg: #ffffff;
+      --badge-border: #cbd5e1;
+
+      --server-bg: #f0fdf4;
+      --server-hdr: #dcfce7;
+      --server-border: #86efac;
+      --server-accent: #15803d;
+      --server-line: #16a34a;
+      --server-pill-bg: #dcfce7;
+      --server-pill-border: #86efac;
+
+      --bot-bg: #fffbeb;
+      --bot-hdr: #fef3c7;
+      --bot-border: #fcd34d;
+      --bot-accent: #b45309;
+      --bot-line: #d97706;
+      --bot-pill-bg: #fef3c7;
+      --bot-pill-border: #fcd34d;
+
+      --client-bg: #f0f9ff;
+      --client-hdr: #e0f2fe;
+      --client-border: #93c5fd;
+      --client-accent: #1d4ed8;
+      --client-line: #2563eb;
+      --client-pill-bg: #dbeafe;
+      --client-pill-border: #93c5fd;
+
+      --merge-bg: #eff6ff;
+      --merge-border: #60a5fa;
+      --dashed-bg: #f8fafc;
+      --dashed-border: #94a3b8;
+      --rcon-line: #64748b;
+      --int-line: #3b82f6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas-bg: #0d1117;
+        --canvas-border: #30363d;
+        --fg: #f0f6fc;
+        --muted: #9ca3af;
+        --card-bg: #161b22;
+        --card-border: #30363d;
+        --group-bg: #11161d;
+        --pill-muted-bg: #21262d;
+        --pill-muted-border: #3b434d;
+        --badge-bg: #161b22;
+        --badge-border: #3b434d;
+
+        --server-bg: #0f2018;
+        --server-hdr: #142c20;
+        --server-border: #235c3e;
+        --server-accent: #4ade80;
+        --server-line: #22c55e;
+        --server-pill-bg: #143222;
+        --server-pill-border: #236342;
+
+        --bot-bg: #20180e;
+        --bot-hdr: #2d2111;
+        --bot-border: #784b14;
+        --bot-accent: #fbbf24;
+        --bot-line: #f59e0b;
+        --bot-pill-bg: #322310;
+        --bot-pill-border: #8a5616;
+
+        --client-bg: #0f1726;
+        --client-hdr: #142038;
+        --client-border: #26487a;
+        --client-accent: #60a5fa;
+        --client-line: #3b82f6;
+        --client-pill-bg: #16294a;
+        --client-pill-border: #2c5594;
+
+        --merge-bg: #13223a;
+        --merge-border: #3b82f6;
+        --dashed-bg: #161b22;
+        --dashed-border: #4b5563;
+        --rcon-line: #9ca3af;
+        --int-line: #60a5fa;
+      }
+    }
+
+    text {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .canvas { fill: var(--canvas-bg); stroke: var(--canvas-border); }
+    .box-server { fill: var(--server-bg); stroke: var(--server-border); }
+    .box-bot { fill: var(--bot-bg); stroke: var(--bot-border); }
+    .box-client { fill: var(--client-bg); stroke: var(--client-border); }
+    .hdr-server { fill: var(--server-hdr); }
+    .hdr-bot { fill: var(--bot-hdr); }
+    .hdr-client { fill: var(--client-hdr); }
+    .subcard { fill: var(--card-bg); stroke: var(--card-border); }
+    .subcard-dashed { fill: var(--dashed-bg); stroke: var(--dashed-border); stroke-dasharray: 4 3; }
+    .subcard-primary { fill: var(--bot-bg); stroke: var(--bot-border); }
+    .subcard-merge { fill: var(--merge-bg); stroke: var(--merge-border); }
+    .subcard-group { fill: var(--group-bg); stroke: var(--card-border); }
+    .mini-card { fill: var(--card-bg); stroke: var(--card-border); }
+
+    .pill-server { fill: var(--server-pill-bg); stroke: var(--server-pill-border); }
+    .pill-bot { fill: var(--bot-pill-bg); stroke: var(--bot-pill-border); }
+    .pill-info { fill: var(--client-pill-bg); stroke: var(--client-pill-border); }
+    .pill-muted { fill: var(--pill-muted-bg); stroke: var(--pill-muted-border); }
+    .badge-bg { fill: var(--badge-bg); stroke: var(--badge-border); }
+    .badge-sse { fill: var(--bot-pill-bg); stroke: var(--bot-border); }
+    .badge-mc { fill: var(--server-pill-bg); stroke: var(--server-border); }
+
+    .t-title { fill: var(--fg); font-size: 15px; font-weight: 700; }
+    .t-card-title { fill: var(--fg); font-size: 12.8px; font-weight: 650; }
+    .t-body { fill: var(--muted); font-size: 11.3px; font-weight: 450; }
+    .t-small { fill: var(--muted); font-size: 10.6px; font-weight: 450; }
+    .t-strong { fill: var(--fg); font-weight: 650; }
+    .t-pill-server { fill: var(--server-accent); font-size: 10.8px; font-weight: 600; }
+    .t-pill-bot { fill: var(--bot-accent); font-size: 10.8px; font-weight: 600; }
+    .t-pill-info { fill: var(--client-accent); font-size: 10.8px; font-weight: 600; }
+    .t-pill-muted { fill: var(--fg); font-size: 10.6px; font-weight: 600; }
+
+    .dot-server { fill: var(--server-line); }
+    .dot-bot { fill: var(--bot-line); }
+    .dot-client { fill: var(--client-line); }
+
+    .line-mc { stroke: var(--server-line); stroke-width: 1.9; fill: none; }
+    .line-cmd { stroke: var(--client-line); stroke-width: 1.6; stroke-dasharray: 4 3; fill: none; }
+    .line-rcon { stroke: var(--rcon-line); stroke-width: 1.6; stroke-dasharray: 4 3; fill: none; }
+    .line-sse { stroke: var(--bot-line); stroke-width: 2.4; fill: none; }
+    .line-internal { stroke: var(--int-line); stroke-width: 1.6; fill: none; }
+
+    .arr-mc { fill: var(--server-line); }
+    .arr-cmd { fill: var(--client-line); }
+    .arr-rcon { fill: var(--rcon-line); }
+    .arr-sse { fill: var(--bot-line); }
+    .arr-int { fill: var(--int-line); }
+  </style>
+
+  <defs>
+    <marker id="arr-mc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path class="arr-mc" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-cmd" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arr-cmd" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-rcon" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arr-rcon" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-sse" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path class="arr-sse" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <marker id="arr-int" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arr-int" d="M 1 1.5 L 9 5 L 1 8.5 z" />
+    </marker>
+    <clipPath id="clip-server"><rect x="14" y="12" width="406" height="200" rx="12" /></clipPath>
+    <clipPath id="clip-bot"><rect x="504" y="12" width="406" height="200" rx="12" /></clipPath>
+    <clipPath id="clip-client"><rect x="14" y="310" width="896" height="398" rx="12" /></clipPath>
+  </defs>
+
+  <rect class="canvas" x="1" y="1" width="922" height="718" rx="14" stroke-width="1" />
+
+  <!-- ==================== TOP LEFT: MINECRAFT SERVER ==================== -->
+  <g>
+    <rect class="box-server" x="14" y="12" width="406" height="200" rx="12" stroke-width="1.5" />
+    <rect class="hdr-server" x="14" y="12" width="406" height="38" clip-path="url(#clip-server)" />
+    <circle class="dot-server" cx="32" cy="31" r="5" />
+    <text class="t-title" x="45" y="36">Minecraft Server</text>
+    <rect class="pill-server" x="244" y="21" width="164" height="21" rx="10.5" stroke-width="1" />
+    <text class="t-pill-server" x="326" y="35.5" text-anchor="middle">Vanilla · No server mod/plugin</text>
+
+    <rect class="subcard" x="28" y="60" width="378" height="66" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="40" y="79">Vanilla Game Protocol (MC 1.20.1)</text>
+    <text class="t-body" x="40" y="98">Syncs world, position, health, equipment &amp; swing/eat actions</text>
+    <text class="t-body" x="40" y="115">Private backpack &amp; open windows go only to the bot client</text>
+
+    <rect class="subcard-dashed" x="28" y="136" width="378" height="64" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="40" y="155">Optional RCON Channel (TCP 25575 · Off by default)</text>
+    <text class="t-body" x="40" y="174">Answers <tspan class="mono">data get entity &lt;bot&gt;</tspan> for full inventory, food &amp; XP</text>
+    <text class="t-small" x="40" y="190">Vanilla RCON cannot expose currently open container windows</text>
+  </g>
+
+  <!-- ==================== SERVER <-> BOT CONNECTOR ==================== -->
+  <g>
+    <line class="line-mc" x1="423" y1="92" x2="501" y2="92" marker-start="url(#arr-mc)" marker-end="url(#arr-mc)" />
+    <rect class="badge-mc" x="424" y="63" width="76" height="20" rx="6" stroke-width="1" />
+    <text class="t-pill-server" x="462" y="77" text-anchor="middle">MC Protocol</text>
+    <text class="t-small" x="462" y="111" text-anchor="middle">Private windows</text>
+  </g>
+
+  <!-- ==================== TOP RIGHT: BOT PROCESS ==================== -->
+  <g>
+    <rect class="box-bot" x="504" y="12" width="406" height="200" rx="12" stroke-width="1.5" />
+    <rect class="hdr-bot" x="504" y="12" width="406" height="38" clip-path="url(#clip-bot)" />
+    <circle class="dot-bot" cx="522" cy="31" r="5" />
+    <text class="t-title" x="535" y="36">Observed Bot Process</text>
+    <rect class="pill-bot" x="752" y="21" width="146" height="21" rx="10.5" stroke-width="1" />
+    <text class="t-pill-bot" x="825" y="35.5" text-anchor="middle">Node.js 22+ · In-process</text>
+
+    <rect class="subcard" x="518" y="60" width="378" height="58" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="530" y="79">Mineflayer Bot Instance</text>
+    <text class="t-body" x="530" y="98">Holds private inventory, active window, workstation &amp; trade data</text>
+
+    <rect class="subcard" x="518" y="128" width="378" height="72" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="530" y="147"><tspan class="mono">integrations/mineflayer</tspan> Bridge (Zero dependencies)</text>
+    <text class="t-body" x="530" y="166">Hooks <tspan class="mono">windowOpen / updateSlot / trades</tspan> &amp; real item SNBT</text>
+    <text class="t-body" x="530" y="184">Optional <tspan class="mono">actionPacing</tspan> · exposes <tspan class="mono">/api/observer/stream</tspan></text>
+  </g>
+
+  <!-- ==================== MIDDLE TRANSPORT CHANNELS ==================== -->
+  <g>
+    <line class="line-cmd" x1="96" y1="310" x2="96" y2="215" marker-end="url(#arr-cmd)" />
+    <rect class="badge-bg" x="24" y="238" width="144" height="44" rx="7" stroke-width="1" />
+    <text class="t-pill-info" x="96" y="255" text-anchor="middle">Optional auto-observe</text>
+    <text class="t-small mono" x="96" y="272" text-anchor="middle">/spectate &lt;bot&gt;</text>
+
+    <line class="line-mc" x1="240" y1="212" x2="240" y2="307" marker-end="url(#arr-mc)" />
+    <rect class="badge-mc" x="174" y="238" width="132" height="44" rx="7" stroke-width="1" />
+    <text class="t-pill-server" x="240" y="255" text-anchor="middle">Spectator sync</text>
+    <text class="t-small" x="240" y="272" text-anchor="middle">View · health · gear</text>
+
+    <line class="line-rcon" x1="384" y1="212" x2="384" y2="307" marker-end="url(#arr-rcon)" />
+    <rect class="badge-bg" x="316" y="238" width="136" height="44" rx="7" stroke-width="1" />
+    <text class="t-pill-muted" x="384" y="255" text-anchor="middle">Optional RCON poll</text>
+    <text class="t-small" x="384" y="272" text-anchor="middle">Fallback when no SSE</text>
+
+    <line class="line-sse" x1="707" y1="212" x2="707" y2="307" marker-end="url(#arr-sse)" />
+    <rect class="badge-sse" x="506" y="234" width="402" height="52" rx="8" stroke-width="1.3" />
+    <text class="t-pill-bot" x="707" y="253" text-anchor="middle">Primary: Read-only HTTP/HTTPS SSE stream (one-way, no bot control)</text>
+    <text class="t-small mono" x="707" y="273" text-anchor="middle">hello · state · window · slot · cursor · pointer · workstations</text>
+  </g>
+
+  <!-- ==================== BOTTOM: OBSERVER CLIENT ==================== -->
+  <g>
+    <rect class="box-client" x="14" y="310" width="896" height="398" rx="12" stroke-width="1.5" />
+    <rect class="hdr-client" x="14" y="310" width="896" height="38" clip-path="url(#clip-client)" />
+    <circle class="dot-client" cx="32" cy="329" r="5" />
+    <text class="t-title" x="45" y="334">Observer Client · Curio Observer</text>
+    <text class="t-body" x="288" y="334">Minecraft 1.20.1 · Fabric client-only mod</text>
+
+    <rect class="pill-muted" x="614" y="319" width="64" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="646" y="333.5" text-anchor="middle"><tspan class="mono">O</tspan> HUD</text>
+    <rect class="pill-muted" x="684" y="319" width="68" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="718" y="333.5" text-anchor="middle"><tspan class="mono">B</tspan> Bright</text>
+    <rect class="pill-muted" x="758" y="319" width="62" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="789" y="333.5" text-anchor="middle"><tspan class="mono">V</tspan> Cam</text>
+    <rect class="pill-muted" x="826" y="319" width="72" height="21" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="862" y="333.5" text-anchor="middle"><tspan class="mono">K</tspan> Config</text>
+
+    <!-- Tier 1 -->
+    <rect class="subcard" x="28" y="360" width="136" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="38" y="379">Auto Observe</text>
+    <text class="t-small mono" x="38" y="395">AutoObserve</text>
+    <text class="t-small" x="38" y="411">Periodic /spectate</text>
+    <text class="t-small" x="38" y="425">Cross-dim reattach</text>
+
+    <rect class="subcard" x="174" y="360" width="132" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="184" y="379">Spectated Entity</text>
+    <text class="t-small mono" x="184" y="395">cameraEntity</text>
+    <text class="t-small" x="184" y="411">Health &amp; visible gear</text>
+    <text class="t-small" x="184" y="425">Swing / eat / use</text>
+
+    <rect class="subcard-dashed" x="316" y="360" width="144" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="326" y="379"><tspan class="mono">RconLink</tspan> (Opt.)</text>
+    <text class="t-small" x="326" y="396">Background poll thread</text>
+    <text class="t-small" x="326" y="412">Parses SNBT →</text>
+    <text class="t-small mono" x="326" y="426">RconSnapshot</text>
+
+    <rect class="subcard-primary" x="470" y="360" width="426" height="74" rx="8" stroke-width="1.2" />
+    <text class="t-card-title" x="482" y="379"><tspan class="mono">ObserverLink</tspan> (Background thread · never blocks render)</text>
+    <text class="t-body" x="482" y="398"><tspan class="mono">SseParser</tspan> → <tspan class="mono">Protocol v1</tspan> validation → lock-free atomic snapshot</text>
+    <text class="t-small" x="482" y="417">Exponential backoff reconnect · 45s heartbeat watchdog · clears window on drop</text>
+
+    <line class="line-internal" x1="240" y1="434" x2="240" y2="457" marker-end="url(#arr-int)" />
+    <line class="line-rcon" x1="388" y1="434" x2="388" y2="457" marker-end="url(#arr-rcon)" />
+    <line class="line-sse" x1="707" y1="434" x2="707" y2="457" marker-end="url(#arr-sse)" />
+
+    <!-- Tier 2 -->
+    <rect class="subcard" x="28" y="460" width="136" height="74" rx="8" stroke-width="1" />
+    <text class="t-card-title" x="38" y="479">Config &amp; i18n</text>
+    <text class="t-small mono" x="38" y="495">curio-observer</text>
+    <text class="t-small" x="38" y="511">Panels · Scale · Gamma</text>
+    <text class="t-small" x="38" y="525">EN / ZH · Persisted</text>
+
+    <rect class="subcard-merge" x="174" y="460" width="722" height="74" rx="8" stroke-width="1.3" />
+    <text class="t-card-title" x="188" y="480">State Merge &amp; Player Isolation · <tspan class="mono">BotState.ofSpectator()</tspan></text>
+    <rect class="pill-info" x="540" y="466" width="342" height="21" rx="10.5" stroke-width="1" />
+    <text class="t-pill-info" x="711" y="480.5" text-anchor="middle">Strict name check: hello.bot == spectated player</text>
+
+    <text class="t-small" x="188" y="514" font-weight="600">Priority:</text>
+    <rect class="pill-bot" x="242" y="499" width="214" height="23" rx="6" stroke-width="1" />
+    <text class="t-pill-bot" x="349" y="514.5" text-anchor="middle">1. SSE Feed (windows / NBT / state)</text>
+    <text class="t-card-title" x="464" y="515" text-anchor="middle">›</text>
+    <rect class="pill-muted" x="472" y="499" width="144" height="23" rx="6" stroke-width="1" />
+    <text class="t-pill-muted" x="544" y="514.5" text-anchor="middle">2. RCON Fallback</text>
+    <text class="t-card-title" x="624" y="515" text-anchor="middle">›</text>
+    <rect class="pill-server" x="632" y="499" width="128" height="23" rx="6" stroke-width="1" />
+    <text class="t-pill-server" x="696" y="514.5" text-anchor="middle">3. Vanilla Client</text>
+    <text class="t-small" x="770" y="514">+ Live hand anims</text>
+
+    <line class="line-internal" x1="332" y1="534" x2="332" y2="557" marker-end="url(#arr-int)" />
+    <line class="line-internal" x1="726" y1="534" x2="726" y2="557" marker-end="url(#arr-int)" />
+
+    <!-- Tier 3 -->
+    <rect class="subcard-group" x="28" y="560" width="504" height="134" rx="9" stroke-width="1" />
+    <text class="t-card-title" x="42" y="580">HUD Overlays (<tspan class="mono">HudRenderCallback</tspan> · replaces vanilla HUD)</text>
+    <rect class="pill-server" x="408" y="566" width="112" height="19" rx="9.5" stroke-width="1" />
+    <text class="t-pill-server" x="464" y="579" text-anchor="middle">Read-only · No clicks</text>
+
+    <rect class="mini-card" x="40" y="590" width="234" height="44" rx="6" stroke-width="1" />
+    <text class="t-card-title" x="50" y="607"><tspan class="mono">vitals</tspan> &amp; <tspan class="mono">view</tspan> status</text>
+    <text class="t-small" x="50" y="624">Health / armor / food / air / XP &amp; helper card</text>
+
+    <rect class="mini-card" x="284" y="590" width="236" height="44" rx="6" stroke-width="1" />
+    <text class="t-card-title" x="294" y="607"><tspan class="mono">inventory</tspan> panel</text>
+    <text class="t-small" x="294" y="624">Armor / 27+9 slots / offhand (yields to window)</text>
+
+    <rect class="mini-card" x="40" y="642" width="480" height="42" rx="6" stroke-width="1" />
+    <text class="t-card-title" x="50" y="659"><tspan class="mono">containers</tspan> live windows &amp; trades (<tspan class="mono">ContainerOverlay</tspan> / <tspan class="mono">MerchantOverlay</tspan>)</text>
+    <text class="t-small" x="50" y="675">Workbench · chests · furnace/brewing · enchanting/anvil · trades · skin preview &amp; animations</text>
+
+    <rect class="subcard-group" x="544" y="560" width="352" height="134" rx="9" stroke-width="1" />
+    <text class="t-card-title" x="558" y="580">Visual &amp; Camera Helpers (Fabric Mixin)</text>
+
+    <rect class="mini-card" x="556" y="590" width="328" height="29" rx="6" stroke-width="1" />
+    <text class="t-small" x="566" y="608.5"><tspan class="mono t-strong">hands</tspan> · First-person held items with swing/eat/use</text>
+
+    <rect class="mini-card" x="556" y="624" width="328" height="29" rx="6" stroke-width="1" />
+    <text class="t-small" x="566" y="642.5"><tspan class="mono t-strong">Auto Camera</tspan> · Room-aware smooth 3rd/1st-person view</text>
+
+    <rect class="mini-card" x="556" y="658" width="328" height="29" rx="6" stroke-width="1" />
+    <text class="t-small" x="566" y="676.5"><tspan class="mono t-strong">Brighten</tspan> · Lightmap gamma boost (keeps darkness/blindness)</text>
+  </g>
+</svg>
