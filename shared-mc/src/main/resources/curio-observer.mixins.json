@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "package": "dev.curio.observer.mixin",
+  "plugin": "dev.curio.observer.mixin.CurioMixinPlugin",
+  "compatibilityLevel": "${compatibility_level}",
+  "client": [${mixin_classes}],
+  "injectors": { "defaultRequire": 1 }
+}
