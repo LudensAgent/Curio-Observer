@@ -4,6 +4,7 @@
   "version": "${version}",
   "name": "Curio Observer",
   "description": "Client-side Mineflayer spectator HUD: live containers, crafting, trading, inventory, adaptive camera and dark-area brightening. Includes a documented bot event bridge; no server mod required.",
+  "icon": "assets/curio-observer/icon.png",
   "environment": "client",
   "entrypoints": { "client": ["dev.curio.observer.CurioObserverClient"] },
   "mixins": ["curio-observer.mixins.json"],

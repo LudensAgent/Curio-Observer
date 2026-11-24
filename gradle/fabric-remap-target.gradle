@@ -114,6 +114,7 @@ tasks.register('verifyReleaseJar') {
         new java.util.jar.JarFile(f).withCloseable { jf ->
             assert jf.getJarEntry('fabric.mod.json') != null : "Missing fabric.mod.json in ${f}"
             assert jf.getJarEntry('curio-observer.mixins.json') != null : "Missing mixins.json in ${f}"
+            assert jf.getJarEntry('assets/curio-observer/icon.png') != null : "Missing icon.png in ${f}"
             def mixinsJson = new groovy.json.JsonSlurper().parseText(jf.getInputStream(jf.getJarEntry('curio-observer.mixins.json')).text)
             assert mixinsJson.client != null && mixinsJson.client.size() > 0 : "No client mixins in ${f}"
             mixinsJson.client.each { name ->

@@ -112,6 +112,7 @@ tasks.register('verifyReleaseJar') {
         new java.util.jar.JarFile(f).withCloseable { jf ->
             assert jf.getJarEntry('fabric.mod.json') != null : "Missing fabric.mod.json in ${f}"
             assert jf.getJarEntry('curio-observer.mixins.json') != null : "Missing mixins.json in ${f}"
+            assert jf.getJarEntry('assets/curio-observer/icon.png') != null : "Missing icon.png in ${f}"
         }
     }
 }
