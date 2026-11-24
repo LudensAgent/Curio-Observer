@@ -70,6 +70,7 @@ export interface ObserverBridge {
 }
 
 export const STREAM_PATH: '/api/observer/stream';
+export function isSupportedMcVersion(version: string | undefined): boolean;
 export function installMineflayerObserver(
   bot: ObserverBotSource,
   options?: { heartbeatMs?: number; stateIntervalMs?: number; actionPacing?: boolean | { intervalMs?: number } },

@@ -1,6 +1,6 @@
 # Mineflayer integration
 
-This dependency-free ESM adapter exposes the **existing bot's** inventory and current interaction window to Curio Observer. It targets Minecraft **1.20.1** and Node **22+**. A second spectator bot cannot supply another player's private slots. No Minecraft server plugin or RCON is required for this feed.
+This dependency-free ESM adapter exposes the **existing bot's** inventory and current interaction window to Curio Observer. It targets Minecraft **1.18.2+** (for any version supported by your Mineflayer build) and Node **22+**. A second spectator bot cannot supply another player's private slots. No Minecraft server plugin or RCON is required for this feed.
 
 The published data contract is [English](../../docs/mineflayer-protocol.md) / [简体中文](../../docs/mineflayer-protocol.zh-CN.md). Integrations in other languages can implement that contract directly.
 

@@ -14,6 +14,15 @@ const frame = (event, data) => {
 };
 const installations = new WeakMap();
 
+export function isSupportedMcVersion(version) {
+  const match = String(version ?? '').trim().match(/^(\d+)\.(\d+)(?:\.(\d+))?/);
+  if (!match) return false;
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const patch = Number(match[3] ?? 0);
+  return major > 1 || (major === 1 && (minor > 18 || (minor === 18 && patch >= 2)));
+}
+
 /**
  * Observe the actual Mineflayer bot after its inventory plugin is initialized (normally first spawn).
  * @param {object} bot The existing Mineflayer bot; see docs/mineflayer-protocol.md for its required fields.
@@ -26,7 +35,9 @@ export function installMineflayerObserver(bot, options = {}) {
     throw new TypeError('Install after Mineflayer initializes bot.username, bot.inventory.slots and its events');
   }
   if (installations.has(bot)) throw new Error('This bot already has an observer; dispose it before reinstalling');
-  if (bot.version && bot.version !== '1.20.1') throw new Error('This bridge currently targets Minecraft 1.20.1');
+  if (bot.version && !isSupportedMcVersion(bot.version)) {
+    throw new Error(`This bridge requires Minecraft 1.18.2 or newer (got ${bot.version})`);
+  }
 
   const clients = new Set();
   const servers = new Set();

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import http from 'node:http';
 import { setTimeout as delay } from 'node:timers/promises';
-import { installMineflayerObserver } from '../index.js';
+import { installMineflayerObserver, isSupportedMcVersion } from '../index.js';
 import { itemData, snbt } from '../items.js';
 
 const bookNbt = { type: 'compound', value: {
@@ -290,4 +290,25 @@ test('respawn sends a new window snapshot after its hello instead of orphan slot
   const hellos = events.flatMap((event, i) => event.event === 'hello' ? [i] : []);
   assert.equal(hellos.length, 2);
   assert.ok(events.slice(hellos[1] + 1).some((event) => event.event === 'window_open'));
+});
+
+test('accepts Minecraft 1.18.2 through 26.x and rejects older versions', async (t) => {
+  assert.equal(isSupportedMcVersion('1.18.2'), true);
+  assert.equal(isSupportedMcVersion('1.19.2'), true);
+  assert.equal(isSupportedMcVersion('1.20.1'), true);
+  assert.equal(isSupportedMcVersion('1.21.11'), true);
+  assert.equal(isSupportedMcVersion('26.1.2'), true);
+  assert.equal(isSupportedMcVersion('26.3'), true);
+  assert.equal(isSupportedMcVersion('1.18.1'), false);
+  assert.equal(isSupportedMcVersion('1.16.5'), false);
+
+  const oldBot = bot();
+  oldBot.version = '1.18.1';
+  assert.throws(() => installMineflayerObserver(oldBot), /1\.18\.2/);
+
+  const modernBot = bot();
+  modernBot.version = '1.21.8';
+  const { until } = await setup(t, modernBot);
+  const hello = await until((event) => event.event === 'hello');
+  assert.equal(hello.mcVersion, '1.21.8');
 });
