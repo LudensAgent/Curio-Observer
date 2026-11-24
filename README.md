@@ -3,16 +3,16 @@
 <p>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://github.com/LudensAgent/Curio-Observer/releases"><img src="https://img.shields.io/github/v/release/LudensAgent/Curio-Observer?cacheSeconds=86400" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/minecraft-1.20.1-62B47A.svg" alt="Minecraft Version">
+  <img src="https://img.shields.io/badge/minecraft-1.18.2--26.3-62B47A.svg" alt="Minecraft Versions">
   <img src="https://img.shields.io/badge/fabric_loader-0.18.5+-DBBE5B.svg" alt="Fabric Loader">
-  <img src="https://img.shields.io/badge/java-17+-ED8B00.svg" alt="Java Version">
+  <img src="https://img.shields.io/badge/java-17%20%7C%2021%20%7C%2025-ED8B00.svg" alt="Java Version">
   <a href="https://github.com/LudensAgent/Curio-Observer/actions/workflows/build.yml"><img src="https://github.com/LudensAgent/Curio-Observer/actions/workflows/build.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/LudensAgent/Curio-Observer/releases"><img src="https://img.shields.io/github/downloads/LudensAgent/Curio-Observer/total?cacheSeconds=86400" alt="GitHub downloads"></a>
 </p>
 
 English | [简体中文](README.zh-CN.md)
 
-A client-side spectator HUD mod for watching Mineflayer bots in Minecraft 1.20.1 (Fabric).
+A client-side spectator HUD mod for watching Mineflayer bots in Minecraft **1.18.2–26.3** (Fabric).
 It mirrors the observed bot's inventory, crafting, containers and trading, and provides
 first-person hands, dark-area brightening and an adaptive broadcast camera.
 
@@ -111,33 +111,49 @@ Existing Curio v1 window feeds remain compatible; unrelated thought/task/dashboa
 
 All keys can be rebound under "Options → Controls → Key Binds", and the toggle state is persisted to `config/curio-observer.json`.
 
-## Requirements
+## Requirements & Version Matrix
 
-- Minecraft **1.20.1**
-- [Fabric Loader](https://fabricmc.net/use/) `>= 0.18.5`
-- [Fabric API](https://modrinth.com/mod/fabric-api)
-- Java **17+**
+Binary-compatible minor Minecraft releases share a single Fabric build so **16 release JARs** cover all **30 stable versions from `1.18.2` through `26.3`**. Each build also requires the matching [Fabric API](https://modrinth.com/mod/fabric-api) for your Minecraft version.
+
+| Release JAR | Minecraft Versions | Fabric Loader | Java |
+|---|---|---|---|
+| `curio-observer-mod-0.4.1-fabric-1.18.2.jar` | `1.18.2` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.19-1.19.2.jar` | `1.19`, `1.19.1`, `1.19.2` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.19.3.jar` | `1.19.3` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.19.4.jar` | `1.19.4` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.20-1.20.1.jar` | `1.20`, `1.20.1` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.20.2-1.20.4.jar` | `1.20.2`, `1.20.3`, `1.20.4` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.20.5-1.20.6.jar` | `1.20.5`, `1.20.6` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21-1.21.1.jar` | `1.21`, `1.21.1` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.2-1.21.4.jar` | `1.21.2`, `1.21.3`, `1.21.4` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.5.jar` | `1.21.5` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.6-1.21.8.jar` | `1.21.6`, `1.21.7`, `1.21.8` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.9-1.21.10.jar` | `1.21.9`, `1.21.10` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.11.jar` | `1.21.11` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-26.1-26.1.2.jar` | `26.1`, `26.1.1`, `26.1.2` | `>= 0.18.5` | 25+ |
+| `curio-observer-mod-0.4.1-fabric-26.2.jar` | `26.2` | `>= 0.18.5` | 25+ |
+| `curio-observer-mod-0.4.1-fabric-26.3.jar` | `26.3` | `>= 0.19.3` | 25+ |
 
 ## Installation
 
-1. Install Fabric Loader (for 1.20.1) and Fabric API.
-2. Download `curio-observer-<version>.jar` from [Releases](../../releases) (or from a GitHub Actions build).
+1. Install [Fabric Loader](https://fabricmc.net/use/) and [Fabric API](https://modrinth.com/mod/fabric-api) for your Minecraft version.
+2. Download the matching `curio-observer-mod-0.4.1-fabric-<mc-span>.jar` from [Releases](../../releases) (or from a GitHub Actions build).
 3. Place the jar in `.minecraft/mods/` and launch the game.
 
 ## Building
 
-Requires Java 17. From the repository root:
+Requires **JDK 25+** to build the full matrix (`javac --release` cross-compiles Java 17, 21, and 25 targets automatically). From the repository root:
 
 ```bash
 ./gradlew build          # Linux / macOS
 gradlew.bat build        # Windows
 ```
 
-The installable output is `build/libs/curio-observer-0.4.0.jar`; the `-sources.jar` is for development.
-`build` runs unit tests and release-bytecode compatibility checks. To run both explicitly:
+All 16 installable release JARs are collected into `build/libs/` with the naming scheme `curio-observer-mod-0.4.1-fabric-<mc-span>.jar`.
+`build` runs the `:common` unit tests, per-version Mixin smoke tests, and release JAR verification across every target. You can also build a single target, for example:
 
 ```bash
-./gradlew test releaseMixinTest
+./gradlew :versions:mc1.20-1.20.1:build
 ```
 
 Test the standalone bridge with Node.js 22+ (no dependency installation required):

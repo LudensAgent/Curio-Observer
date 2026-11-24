@@ -2,7 +2,7 @@
 
 [English](mineflayer-protocol.md)
 
-Curio Observer 是面向 Minecraft 1.20.1 Fabric 的客户端附身观察模组。视角来自游戏的旁观机制；背包、合成、容器和村民交易等私有信息来自被观察 bot 的数据流。本文件规定第三方 Mineflayer 项目需要提供的最低接口。[随附适配器](../integrations/mineflayer/README.md) 可直接接入，不需要依赖参考仓库。
+Curio Observer 是面向 Minecraft **1.18.2–26.3** Fabric 的客户端附身观察模组。视角来自游戏的旁观机制；背包、合成、容器和村民交易等私有信息来自被观察 bot 的数据流。本文件规定第三方 Mineflayer 项目需要提供的最低接口。[随附适配器](../integrations/mineflayer/README.md) 可直接接入，不需要依赖参考仓库。
 
 ## 最小接入
 
@@ -17,7 +17,7 @@ Curio Observer 是面向 Minecraft 1.20.1 Fabric 的客户端附身观察模组�
 5. 重连后重新发送当前完整快照。v1 不要求保存历史事件或处理 `Last-Event-ID`。
 6. bot 离线／死亡时发送 `offline`／`dead` 状态并清理窗口；恢复在线后提供新状态。
 
-一个数据流对应一个 bot。`hello.bot` 必须与被附身观察的 Minecraft 用户名完全一致，客户端不会将另一只 bot 的背包叠加到当前目标。协议版本是 `1`，Minecraft 版本是 `1.20.1`。
+一个数据流对应一个 bot。`hello.bot` 必须与被附身观察的 Minecraft 用户名完全一致，客户端不会将另一只 bot 的背包叠加到当前目标。协议版本是 `1`，Minecraft 版本需为 `1.18.2` 及以上（例如 `1.20.1`、`1.21.8`、`26.1.2`）。
 
 默认地址为 `http://127.0.0.1:3000/api/observer/stream`。在模组的 K 设置中启用 Mineflayer feed 并填写 URL；配置文件对应 `feedEnabled`、`feedUrl`。
 

@@ -2,7 +2,7 @@
 
 [简体中文](mineflayer-protocol.zh-CN.md)
 
-Curio Observer is a Minecraft 1.20.1 Fabric client mod for spectating a Mineflayer bot. Its camera uses Minecraft's spectator view; private inventories and interaction windows arrive through the bot's telemetry stream. This document is the public integration contract. The bundled [adapter](../integrations/mineflayer/README.md) implements it without depending on another repository.
+Curio Observer is a Minecraft **1.18.2–26.3** Fabric client mod for spectating a Mineflayer bot. Its camera uses Minecraft's spectator view; private inventories and interaction windows arrive through the bot's telemetry stream. This document is the public integration contract. The bundled [adapter](../integrations/mineflayer/README.md) implements it without depending on another repository.
 
 ## Minimum implementation
 
@@ -17,7 +17,7 @@ Implement these requirements for basic container support:
 5. On every reconnect send the complete current snapshot again. This v1 contract has no durable replay cursor or `Last-Event-ID` requirement.
 6. Send `bot_status` `offline` or `dead` when applicable, and clear the active window. A later online state requires fresh data.
 
-One stream represents one bot. `hello.bot` must exactly match the observed Minecraft player's username; the mod does not overlay another bot's inventory on the camera target. `hello.protocol` must be `1`, and `mcVersion` must be `1.20.1`.
+One stream represents one bot. `hello.bot` must exactly match the observed Minecraft player's username; the mod does not overlay another bot's inventory on the camera target. `hello.protocol` must be `1`, and `mcVersion` must be `1.18.2` or newer (e.g. `1.20.1`, `1.21.8`, `26.1.2`).
 
 The default path is `/api/observer/stream`, with URL `http://127.0.0.1:3000/api/observer/stream`. Configure `feedEnabled` and `feedUrl` in the mod's K settings or `config/curio-observer.json`.
 

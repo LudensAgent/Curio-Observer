@@ -3,16 +3,16 @@
 <p>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://github.com/LudensAgent/Curio-Observer/releases"><img src="https://img.shields.io/github/v/release/LudensAgent/Curio-Observer?cacheSeconds=86400" alt="最新版本"></a>
-  <img src="https://img.shields.io/badge/minecraft-1.20.1-62B47A.svg" alt="Minecraft 版本">
+  <img src="https://img.shields.io/badge/minecraft-1.18.2--26.3-62B47A.svg" alt="Minecraft 版本">
   <img src="https://img.shields.io/badge/fabric_loader-0.18.5+-DBBE5B.svg" alt="Fabric Loader">
-  <img src="https://img.shields.io/badge/java-17+-ED8B00.svg" alt="Java 版本">
+  <img src="https://img.shields.io/badge/java-17%20%7C%2021%20%7C%2025-ED8B00.svg" alt="Java 版本">
   <a href="https://github.com/LudensAgent/Curio-Observer/actions/workflows/build.yml"><img src="https://github.com/LudensAgent/Curio-Observer/actions/workflows/build.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/LudensAgent/Curio-Observer/releases"><img src="https://img.shields.io/github/downloads/LudensAgent/Curio-Observer/total?cacheSeconds=86400" alt="GitHub 下载量"></a>
 </p>
 
 [English](README.md) | 简体中文
 
-用于附身观察 Mineflayer bot 的客户端 HUD 模组，适用于 Minecraft 1.20.1（Fabric）。
+用于附身观察 Mineflayer bot 的客户端 HUD 模组，适用于 Minecraft **1.18.2–26.3**（Fabric）。
 显示 bot 的背包、合成、容器和村民交易，并提供第一人称手持、暗处增亮和自适应相机。
 
 ![Curio Observer 工作台 HUD：被观察 bot 的角色、合成网格、产物和背包](docs/images/workbench-observer.png)
@@ -100,33 +100,49 @@ bot.once('spawn', async () => {
 
 所有按键可在「选项 → 控制 → 按键绑定」中修改，开关状态持久化到 `config/curio-observer.json`。
 
-## 依赖
+## 依赖与版本兼容矩阵
 
-- Minecraft **1.20.1**
-- [Fabric Loader](https://fabricmc.net/use/) `>= 0.18.5`
-- [Fabric API](https://modrinth.com/mod/fabric-api)
-- Java **17+**
+二进制兼容的 Minecraft 小版本已合并到同一个 Fabric 构建中，仅需 **16 个发布包**即可覆盖 **`1.18.2` 至 `26.3`** 全部 **30 个正式版本**。每个版本均需安装对应 Minecraft 版本的 [Fabric API](https://modrinth.com/mod/fabric-api)。
+
+| 发布文件名 | 覆盖 Minecraft 版本 | Fabric Loader | Java |
+|---|---|---|---|
+| `curio-observer-mod-0.4.1-fabric-1.18.2.jar` | `1.18.2` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.19-1.19.2.jar` | `1.19`, `1.19.1`, `1.19.2` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.19.3.jar` | `1.19.3` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.19.4.jar` | `1.19.4` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.20-1.20.1.jar` | `1.20`, `1.20.1` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.20.2-1.20.4.jar` | `1.20.2`, `1.20.3`, `1.20.4` | `>= 0.18.5` | 17+ |
+| `curio-observer-mod-0.4.1-fabric-1.20.5-1.20.6.jar` | `1.20.5`, `1.20.6` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21-1.21.1.jar` | `1.21`, `1.21.1` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.2-1.21.4.jar` | `1.21.2`, `1.21.3`, `1.21.4` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.5.jar` | `1.21.5` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.6-1.21.8.jar` | `1.21.6`, `1.21.7`, `1.21.8` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.9-1.21.10.jar` | `1.21.9`, `1.21.10` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-1.21.11.jar` | `1.21.11` | `>= 0.18.5` | 21+ |
+| `curio-observer-mod-0.4.1-fabric-26.1-26.1.2.jar` | `26.1`, `26.1.1`, `26.1.2` | `>= 0.18.5` | 25+ |
+| `curio-observer-mod-0.4.1-fabric-26.2.jar` | `26.2` | `>= 0.18.5` | 25+ |
+| `curio-observer-mod-0.4.1-fabric-26.3.jar` | `26.3` | `>= 0.19.3` | 25+ |
 
 ## 安装
 
-1. 安装 Fabric Loader（针对 1.20.1）与 Fabric API。
-2. 从 [Releases](../../releases)（或 GitHub Actions 构建产物）下载 `curio-observer-<version>.jar`。
+1. 为目标 Minecraft 版本安装 [Fabric Loader](https://fabricmc.net/use/) 与 [Fabric API](https://modrinth.com/mod/fabric-api)。
+2. 从 [Releases](../../releases)（或 GitHub Actions 构建产物）下载对应版本跨度的 `curio-observer-mod-0.4.1-fabric-<mc版本号跨度>.jar`。
 3. 将 jar 放入 `.minecraft/mods/` 目录，启动游戏。
 
 ## 构建
 
-要求 Java 17。在仓库根目录执行：
+构建完整多版本矩阵需要 **JDK 25+**（`javac --release` 会自动交叉编译 Java 17、21、25 目标）。在仓库根目录执行：
 
 ```bash
 ./gradlew build          # Linux / macOS
 gradlew.bat build        # Windows
 ```
 
-可安装产物位于 `build/libs/curio-observer-0.4.0.jar`，`-sources.jar` 用于开发。
-`build` 会运行单元测试和发布字节码兼容性检查；也可单独执行：
+全部 16 个可安装发布包会统一汇总到 `build/libs/`，命名为 `curio-observer-mod-0.4.1-fabric-<mc版本号跨度>.jar`。
+`build` 会运行 `:common` 单元测试、各版本 Mixin 冒烟测试和发布包校验；也可单独构建某个目标：
 
 ```bash
-./gradlew test releaseMixinTest
+./gradlew :versions:mc1.20-1.20.1:build
 ```
 
 使用 Node.js 22+ 验证独立桥接，无需安装依赖：
