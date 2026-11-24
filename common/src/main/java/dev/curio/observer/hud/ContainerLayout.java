@@ -3,28 +3,28 @@ package dev.curio.observer.hud;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Protocol slot indices and native 1.20.1 GUI coordinates, independent of the renderer. */
-record ContainerLayout(Background background, int width, int height, int storageRows, int titleX,
-                       int inventoryY, String titleKey, List<Slot> slots) {
-    enum Background { INVENTORY, CRAFTING_TABLE, FURNACE, BLAST_FURNACE, SMOKER, ENCHANTING_TABLE, ANVIL,
+/** Protocol slot indices and native GUI coordinates, independent of the renderer. */
+public record ContainerLayout(Background background, int width, int height, int storageRows, int titleX,
+                              int inventoryY, String titleKey, List<Slot> slots) {
+    public enum Background { INVENTORY, CRAFTING_TABLE, FURNACE, BLAST_FURNACE, SMOKER, ENCHANTING_TABLE, ANVIL,
         BREWING_STAND, HOPPER, SMITHING, GRINDSTONE, STONECUTTER, LOOM, DISPENSER, SHULKER_BOX, CARTOGRAPHY_TABLE, BEACON, MERCHANT, GENERIC }
 
     /** playerSlot is the corresponding inventory-protocol index, or -1 for container-only slots. */
-    record Slot(int index, int x, int y, int playerSlot) {}
+    public record Slot(int index, int x, int y, int playerSlot) {}
 
     /** Bounds and model anchor in the same local coordinates as the slots. */
-    record Preview(int x, int y, int width, int height, int centerX, int baseY, int size) {}
+    public record Preview(int x, int y, int width, int height, int centerX, int baseY, int size) {}
 
-    ContainerLayout {
+    public ContainerLayout {
         slots = List.copyOf(slots);
     }
 
     /** The crafting table keeps its native texture intact beside a dedicated character panel. */
-    int backgroundX() { return background == Background.CRAFTING_TABLE ? 64 : 0; }
+    public int backgroundX() { return background == Background.CRAFTING_TABLE ? 64 : 0; }
 
-    int inventoryX() { return background == Background.BEACON ? 36 : background == Background.MERCHANT ? 107 : backgroundX() + 8; }
+    public int inventoryX() { return background == Background.BEACON ? 36 : background == Background.MERCHANT ? 107 : backgroundX() + 8; }
 
-    Preview playerPreview() {
+    public Preview playerPreview() {
         return switch (background) {
             case INVENTORY -> new Preview(26, 8, 50, 70, 51, 75, 30);
             case CRAFTING_TABLE -> new Preview(7, 8, 50, 150, 32, 132, 48);
@@ -32,7 +32,7 @@ record ContainerLayout(Background background, int width, int height, int storage
         };
     }
 
-    static ContainerLayout forWindow(String kind, int slotCount) {
+    public static ContainerLayout forWindow(String kind, int slotCount) {
         List<Slot> slots = new ArrayList<>();
         switch (kind) {
             case "inventory" -> {
@@ -88,9 +88,18 @@ record ContainerLayout(Background background, int width, int height, int storage
                 return new ContainerLayout(Background.HOPPER, 176, 133, 0, 8, 51, "container.hopper", slots);
             }
             case "smithing" -> {
-                grid(slots, 0, 3, 3, 8, 48);
-                slots.add(new Slot(3, 98, 48, -1));
-                inventory(slots, 4, 8, 84);
+                if (slotCount == 39) {
+                    // Pre-1.20 smithing table (1.18.2–1.19.4): 2 inputs + 1 result + 36 player slots.
+                    slots.add(new Slot(0, 27, 47, -1));
+                    slots.add(new Slot(1, 76, 47, -1));
+                    slots.add(new Slot(2, 134, 47, -1));
+                    inventory(slots, 3, 8, 84);
+                } else {
+                    // 1.20+ smithing table: template + base + addition + result + 36 player slots.
+                    grid(slots, 0, 3, 3, 8, 48);
+                    slots.add(new Slot(3, 98, 48, -1));
+                    inventory(slots, 4, 8, 84);
+                }
                 return new ContainerLayout(Background.SMITHING, 176, 166, 0, 8, 84, "container.upgrade", slots);
             }
             case "grindstone" -> {

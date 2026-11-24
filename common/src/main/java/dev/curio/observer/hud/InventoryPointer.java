@@ -4,8 +4,8 @@ import dev.curio.observer.model.Protocol;
 import dev.curio.observer.state.BotState;
 
 /** Follows real click targets; slot updates (including result slots) never redirect a drag. */
-final class InventoryPointer {
-    record Frame(float x, float y, Protocol.ItemData item, boolean visible) {}
+public final class InventoryPointer {
+    public record Frame(float x, float y, Protocol.ItemData item, boolean visible) {}
     private BotState.Pointer pointer;
     private long openedAt = -1;
     private int windowId = -1;
@@ -14,9 +14,9 @@ final class InventoryPointer {
     private int duration;
     private float fromX, fromY, toX, toY;
 
-    void reset() { windowId = -1; openedAt = -1; pointer = null; }
+    public void reset() { windowId = -1; openedAt = -1; pointer = null; }
 
-    Frame sample(ContainerLayout layout, BotState.Window window, Protocol.ItemData cursor, long now) {
+    public Frame sample(ContainerLayout layout, BotState.Window window, Protocol.ItemData cursor, long now) {
         BotState.Pointer next = window.pointer();
         int target = next == null ? window.lastSlot() : next.data().slot();
         var slot = layout.slots().stream().filter(s -> s.index() == target).findFirst().orElse(layout.slots().get(0));
@@ -44,8 +44,6 @@ final class InventoryPointer {
             legacyMovement = window.cursorMovedAt();
         }
         float progress = progress(now);
-        // Retain the entire carried stack until it reaches the release point,
-        // even if the acknowledgement arrives between two render frames.
         Protocol.ItemData item = next != null && progress < 1 ? next.data().item() : cursor;
         return new Frame(fromX + (toX - fromX) * progress, fromY + (toY - fromY) * progress,
                 item, next != null || cursor != null);

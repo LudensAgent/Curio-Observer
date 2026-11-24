@@ -1,7 +1,5 @@
 package dev.curio.observer.render;
 
-import net.minecraft.util.math.Vec3d;
-
 /** Frame-time camera smoothing and shot hysteresis, independent of rendering and entity mutation. */
 public final class BroadcastCameraState {
     private static final double MIN_THIRD_PERSON_DISTANCE = 1.25;
@@ -9,7 +7,7 @@ public final class BroadcastCameraState {
     private static final long NO_OPEN_SPACE = Long.MIN_VALUE;
     private Object target;
     private Object world;
-    private Vec3d eye;
+    private double eyeX, eyeY, eyeZ;
     private long lastNanos;
     private long openSince = NO_OPEN_SPACE;
     private boolean initialized;
@@ -20,11 +18,15 @@ public final class BroadcastCameraState {
 
     public record Frame(float yaw, float pitch, double distance, boolean thirdPerson) {}
 
-    public Frame update(Object target, Object world, Vec3d eye, float targetYaw, float targetPitch,
+    public Frame update(Object target, Object world, double eyeX, double eyeY, double eyeZ,
+                        float targetYaw, float targetPitch,
                         double availableDistance, boolean roomy, double desiredDistance,
                         double smoothingSeconds, long nowNanos) {
+        double dx = this.eyeX - eyeX;
+        double dy = this.eyeY - eyeY;
+        double dz = this.eyeZ - eyeZ;
         boolean discontinuity = !initialized || this.target != target || this.world != world
-                || this.eye.squaredDistanceTo(eye) > 64 || nowNanos < lastNanos;
+                || (dx * dx + dy * dy + dz * dz) > 64 || nowNanos < lastNanos;
         double elapsed = discontinuity ? 0 : Math.min(0.1, (nowNanos - lastNanos) / 1_000_000_000.0);
         if (discontinuity) {
             reset();
@@ -34,7 +36,9 @@ public final class BroadcastCameraState {
         }
         this.target = target;
         this.world = world;
-        this.eye = eye;
+        this.eyeX = eyeX;
+        this.eyeY = eyeY;
+        this.eyeZ = eyeZ;
         lastNanos = nowNanos;
 
         double available = Math.max(0, availableDistance);
@@ -57,14 +61,12 @@ public final class BroadcastCameraState {
         double blend = smoothingSeconds <= 0 ? 1 : -Math.expm1(-elapsed / smoothingSeconds);
         yaw += (float) (wrapDegrees(targetYaw - yaw) * blend);
         float desiredPitch = thirdPerson ? Math.max(-10, Math.min(25, targetPitch)) : targetPitch;
-        // A shot cut resets pitch immediately so a tunnel view never inherits a clamped third-person aim.
         if (thirdPerson != wasThirdPerson) pitch = desiredPitch;
         else pitch += (float) ((desiredPitch - pitch) * blend);
         if (thirdPerson) {
             double desiredOffset = Math.min(available, desired);
             if (desiredOffset < distance) distance = desiredOffset;
             else distance += (desiredOffset - distance) * blend;
-            // Collision distance is an immediate hard bound, even on a long or paused frame.
             distance = Math.min(distance, available);
         }
         return new Frame(yaw, pitch, distance, thirdPerson);
@@ -73,7 +75,7 @@ public final class BroadcastCameraState {
     public void reset() {
         target = null;
         world = null;
-        eye = null;
+        eyeX = eyeY = eyeZ = 0;
         lastNanos = 0;
         openSince = NO_OPEN_SPACE;
         initialized = false;

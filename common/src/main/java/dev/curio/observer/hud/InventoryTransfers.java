@@ -5,11 +5,11 @@ import dev.curio.observer.state.BotState;
 import java.util.List;
 
 /** Short visual traces of real operations; never a replay queue for inventory snapshots. */
-final class InventoryTransfers {
+public final class InventoryTransfers {
     private static final long DEPARTURE_MS = 450;
-    record Departure(Protocol.ItemData item, float x, float y) {}
+    public record Departure(Protocol.ItemData item, float x, float y) {}
 
-    static List<Departure> departures(ContainerLayout layout, BotState.Window window, long now) {
+    public static List<Departure> departures(ContainerLayout layout, BotState.Window window, long now) {
         if (!window.visible(now)) return List.of();
         return window.transfers().stream()
                 .filter(transfer -> transfer.data().kind().equals("drop")

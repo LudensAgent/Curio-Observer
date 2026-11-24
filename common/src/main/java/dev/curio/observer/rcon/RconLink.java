@@ -9,13 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,8 +127,6 @@ public final class RconLink implements AutoCloseable {
             int length = readIntLE(in);
             int rid = readIntLE(in);
             int type = readIntLE(in);
-            // Each packet appends two null bytes to its payload; read them so they never desync the
-            // next packet, then strip them before decoding.
             byte[] payload = new byte[Math.max(0, length - 8)];
             in.readFully(payload);
             if (type != RESPONSE_VALUE || rid != expectedId) return response.toString();
@@ -140,9 +134,6 @@ public final class RconLink implements AutoCloseable {
             while (end > 0 && payload[end - 1] == 0) end--;
             String chunk = new String(payload, 0, end, StandardCharsets.UTF_8);
             response.append(chunk);
-            // Minecraft splits responses longer than 4096 characters into several same-id packets and
-            // sends no terminator. A short chunk ends the sequence; an exactly-4096-char final chunk is
-            // detected once the SNBT compound it carries is complete.
             if (chunk.length() < 4096 || completeCompound(response.toString())) return response.toString();
         }
     }
@@ -151,7 +142,7 @@ public final class RconLink implements AutoCloseable {
         int brace = text.indexOf('{');
         if (brace < 0) return false;
         try {
-            NbtHelper.fromNbtProviderString(text.substring(brace));
+            SnbtParser.parseCompound(text.substring(brace));
             return true;
         } catch (Exception ignored) {
             return false;
@@ -188,12 +179,12 @@ public final class RconLink implements AutoCloseable {
     }
 
     /** Parses the {@code data get entity <name>} feedback: a message prefix followed by the SNBT compound. */
-    private static RconSnapshot parse(String name, String response, long pollMillis) {
+    static RconSnapshot parse(String name, String response, long pollMillis) {
         int brace = response.indexOf('{');
         if (brace < 0) return null;
-        NbtCompound root;
+        Map<String, Object> root;
         try {
-            root = NbtHelper.fromNbtProviderString(response.substring(brace));
+            root = SnbtParser.parseCompound(response.substring(brace));
         } catch (Exception exception) {
             LOGGER.debug("Cannot parse RCON entity data: {}", exception.getMessage());
             return null;
@@ -202,10 +193,10 @@ public final class RconLink implements AutoCloseable {
         List<Protocol.ItemData> hotbar = new ArrayList<>(Protocol.emptySlots(9));
         List<Protocol.ItemData> main = new ArrayList<>(Protocol.emptySlots(27));
         Protocol.ItemData offhand = null, head = null, chest = null, legs = null, feet = null;
-        NbtList inventory = root.getList("Inventory", 10);
-        for (int i = 0; i < inventory.size(); i++) {
-            NbtCompound item = inventory.getCompound(i);
-            int slot = item.getByte("Slot");
+        List<Object> inventory = SnbtParser.asList(root.get("Inventory"));
+        for (Object entry : inventory) {
+            Map<String, Object> item = SnbtParser.asCompound(entry);
+            int slot = SnbtParser.asInt(item.get("Slot"));
             Protocol.ItemData data = itemData(item);
             if (slot >= 0 && slot < 9) hotbar.set(slot, data);
             else if (slot >= 9 && slot < 36) main.set(slot - 9, data);
@@ -216,23 +207,50 @@ public final class RconLink implements AutoCloseable {
             else if (slot == -106) offhand = data;
         }
 
-        int food = MathHelper.clamp(root.getInt("foodLevel"), 0, 20);
-        float saturation = MathHelper.clamp(root.getFloat("foodSaturationLevel"), 0.0F, 20.0F);
-        int xpLevel = Math.max(0, root.getInt("XpLevel"));
-        float xpProgress = MathHelper.clamp(root.getFloat("XpProgress"), 0.0F, 1.0F);
-        int selected = MathHelper.clamp(root.getInt("SelectedItemSlot"), 0, 8);
+        // 1.21.5+ stores equipped armor/offhand under `equipment` compound in addition to/instead of Inventory slots.
+        Map<String, Object> equipment = SnbtParser.asCompound(root.get("equipment"));
+        if (!equipment.isEmpty()) {
+            if (head == null && equipment.containsKey("head")) head = itemData(SnbtParser.asCompound(equipment.get("head")));
+            if (chest == null && equipment.containsKey("chest")) chest = itemData(SnbtParser.asCompound(equipment.get("chest")));
+            if (legs == null && equipment.containsKey("legs")) legs = itemData(SnbtParser.asCompound(equipment.get("legs")));
+            if (feet == null && equipment.containsKey("feet")) feet = itemData(SnbtParser.asCompound(equipment.get("feet")));
+            if (offhand == null && equipment.containsKey("offhand")) offhand = itemData(SnbtParser.asCompound(equipment.get("offhand")));
+        }
+
+        int food = clamp(SnbtParser.asInt(root.get("foodLevel")), 0, 20);
+        float saturation = clamp(SnbtParser.asFloat(root.get("foodSaturationLevel")), 0.0F, 20.0F);
+        int xpLevel = Math.max(0, SnbtParser.asInt(root.get("XpLevel")));
+        float xpProgress = clamp(SnbtParser.asFloat(root.get("XpProgress")), 0.0F, 1.0F);
+        int selected = clamp(SnbtParser.asInt(root.get("SelectedItemSlot")), 0, 8);
         return new RconSnapshot(name, System.currentTimeMillis(), Arrays.asList(head, chest, legs, feet),
                 hotbar, offhand, main, selected, food, saturation, xpLevel, xpProgress, pollMillis + SNAPSHOT_GRACE_MS);
     }
 
-    private static Protocol.ItemData itemData(NbtCompound item) {
-        String id = item.getString("id");
-        if (id == null || id.isBlank() || id.length() > 256) return null;
-        int count = Math.max(1, item.getByte("Count"));
-        NbtCompound tag = item.getCompound("tag");
-        int damage = Math.max(0, tag.getInt("Damage"));
-        boolean enchanted = tag.contains("Enchantments") && !tag.getList("Enchantments", 10).isEmpty();
-        String name = tag.contains("display") ? plainText(tag.getCompound("display").getString("Name")) : null;
+    private static Protocol.ItemData itemData(Map<String, Object> item) {
+        String id = SnbtParser.asString(item.get("id"));
+        if (id.isBlank() || id.length() > 256) return null;
+        int rawCount = item.containsKey("count") ? SnbtParser.asInt(item.get("count")) : SnbtParser.asInt(item.get("Count"));
+        int count = Math.max(1, rawCount);
+
+        int damage = 0;
+        boolean enchanted = false;
+        String name = null;
+
+        Map<String, Object> components = SnbtParser.asCompound(item.get("components"));
+        if (!components.isEmpty()) {
+            damage = Math.max(0, SnbtParser.asInt(components.get("minecraft:damage")));
+            enchanted = hasComponentEnchantments(components.get("minecraft:enchantments"))
+                    || hasComponentEnchantments(components.get("minecraft:stored_enchantments"))
+                    || SnbtParser.asBoolean(components.get("minecraft:enchantment_glint_override"));
+            name = SnbtParser.extractPlainText(components.get("minecraft:custom_name"));
+        } else {
+            Map<String, Object> tag = SnbtParser.asCompound(item.get("tag"));
+            damage = Math.max(0, SnbtParser.asInt(tag.get("Damage")));
+            enchanted = !SnbtParser.asList(tag.get("Enchantments")).isEmpty()
+                    || !SnbtParser.asList(tag.get("StoredEnchantments")).isEmpty();
+            Map<String, Object> display = SnbtParser.asCompound(tag.get("display"));
+            if (display.containsKey("Name")) name = SnbtParser.extractPlainText(display.get("Name"));
+        }
         try {
             return new Protocol.ItemData(id, count, damage, 0, enchanted, name);
         } catch (IllegalArgumentException exception) {
@@ -240,13 +258,18 @@ public final class RconLink implements AutoCloseable {
         }
     }
 
-    private static String plainText(String json) {
-        if (json == null || json.isBlank()) return null;
-        try {
-            Text text = Text.Serializer.fromJson(json);
-            return text == null ? json : text.getString();
-        } catch (RuntimeException exception) {
-            return json;
-        }
+    private static boolean hasComponentEnchantments(Object value) {
+        Map<String, Object> map = SnbtParser.asCompound(value);
+        if (map.isEmpty()) return false;
+        if (map.containsKey("levels")) return !SnbtParser.asCompound(map.get("levels")).isEmpty();
+        return true;
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

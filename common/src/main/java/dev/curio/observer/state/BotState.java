@@ -1,19 +1,14 @@
 package dev.curio.observer.state;
 
 import dev.curio.observer.model.Protocol;
-import dev.curio.observer.rcon.RconSnapshot;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.MathHelper;
 
-/** Immutable feed snapshots, merged with the actual spectated player on the client thread. */
+/** Immutable feed snapshots, independent of Minecraft runtime classes. */
 public record BotState(Protocol.Hello hello, Protocol.State state, Window window, Protocol.ItemData cursor,
                        String status, Connection connection, String message, Actions actions, boolean hasState) {
     public BotState(Protocol.Hello hello, Protocol.State state, Actions actions, boolean hasState) {
@@ -36,8 +31,6 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Window window
                     && data.cookTime() != null && next.cookTime() != null && next.cookTime() > data.cookTime()
                     && next.cookTimeTotal() != null && next.cookTimeTotal() > 0
                     && Objects.equals(data.cookTimeTotal(), next.cookTimeTotal());
-            // Each server property arrives separately. A fuel-only snapshot must neither stop cooking
-            // nor refresh the deadline for predicting the last observed cook-time change.
             boolean burning = next.burnTime() != null && next.burnTime() > 0;
             long burnAt = !Objects.equals(data.burnTime(), next.burnTime()) ? now : burnReceivedAt;
             Protocol.FurnaceData invalidatedRecipe = recipeBeforeChange != null && !cookChanged ? recipeBeforeChange : null;
@@ -123,6 +116,25 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Window window
                 Connection.DISCONNECTED, "Agent disconnected", Actions.empty(), false);
     }
 
+    /** Accepts Minecraft 1.18.2+ (including 1.19–1.21.x and year-based 26.x releases). */
+    public static boolean isSupportedMcVersion(String version) {
+        if (version == null || version.isBlank()) return false;
+        String base = version.split("[-+ ]", 2)[0];
+        String[] parts = base.split("\\.");
+        if (parts.length < 2 || parts.length > 3) return false;
+        try {
+            int major = Integer.parseInt(parts[0]);
+            int minor = Integer.parseInt(parts[1]);
+            int patch = parts.length == 3 ? Integer.parseInt(parts[2]) : 0;
+            if (major < 0 || minor < 0 || patch < 0) return false;
+            if (major >= 26) return true;
+            if (major == 1) return minor > 18 || (minor == 18 && patch >= 2);
+            return false;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
     /** Retain only the bot identity on disconnect so camera-gated connection warnings remain visible. */
     public BotState withConnection(Connection value, String detail) {
         if (value == Connection.CONNECTED) return new BotState(hello, state, window, cursor, status, value, detail, actions, hasState);
@@ -133,24 +145,21 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Window window
     public BotState apply(Protocol.Event event, long now) {
         if (event == null) return this;
         if (event instanceof Protocol.Hello value) {
-            boolean compatible = value.protocol() == Protocol.VERSION && "1.20.1".equals(value.mcVersion());
+            boolean compatible = value.protocol() == Protocol.VERSION && isSupportedMcVersion(value.mcVersion());
             return new BotState(value, Protocol.State.empty(), null, null, "online",
                     compatible ? Connection.CONNECTED : Connection.PROTOCOL_MISMATCH,
                     compatible ? "Connected to " + value.bot() : "Observer protocol or Minecraft version mismatch", Actions.empty(), false);
         }
-        // An initial hello is mandatory. Incompatible sessions remain visible only as a status message.
         if (!protocolCompatible() || connection != Connection.CONNECTED) return this;
         if (event instanceof Protocol.BotStatus value) {
             if (!"online".equals(value.status())) return new BotState(hello, Protocol.State.empty(), null, null,
                     value.status(), connection, value.status().equals("dead") ? "Bot is dead" : "Bot is offline", Actions.empty(), false);
             return new BotState(hello, state, window, cursor, value.status(), connection, "Connected to " + hello.bot(), actions, hasState);
         }
-        // Offline/dead bots can still send a final state packet; it must not revive stale rendering.
         if (!"online".equals(status)) return this;
         if (event instanceof Protocol.State value) return new BotState(hello, value, window, cursor, status, connection, message, actions, true);
         if (event instanceof Protocol.WindowOpen value) {
             Furnace furnace = List.of("furnace", "blast_furnace", "smoker").contains(value.kind()) && value.furnace() != null ? new Furnace(value.furnace(), now, false) : null;
-            // Workstations always carry their panel so the overlay can show "no option yet" before the first property.
             Enchanting enchanting = "enchanting_table".equals(value.kind())
                     ? new Enchanting(value.enchanting() == null ? Protocol.EnchantingData.EMPTY : value.enchanting(), now) : null;
             Protocol.AnvilData anvil = "anvil".equals(value.kind()) ? (value.anvil() == null ? Protocol.AnvilData.EMPTY : value.anvil()) : null;
@@ -195,8 +204,6 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Window window
             int previous = window.lastSlot() < 0 ? value.slot() : window.lastSlot();
             Furnace furnace = window.furnace();
             if (furnace != null && value.slot() <= 2 && !Objects.equals(window.slots().get(value.slot()), value.item())) {
-                // A material switch invalidates recipe properties; any furnace slot change stops prediction
-                // until the server confirms that cooking is advancing again (including full output slots).
                 furnace = furnace.slotChanged(value.slot() == 0 && !sameMaterial(window.slots().get(0), value.item()));
             }
             Window next = window.with(slots, changed, previous, value.slot(), now, furnace, window.enchanting(), window.anvil());
@@ -212,7 +219,6 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Window window
         if (event instanceof Protocol.InventoryTransfer value) {
             if (window == null || !window.open() || window.id() != value.windowId() || value.slot() >= window.slots().size()) return this;
             Transfer transfer = new Transfer(value, now);
-            // Keep actual operations that can arrive between frames, without delaying authoritative slots.
             List<Transfer> transfers = new ArrayList<>(window.transfers().stream()
                     .filter(prior -> now - prior.receivedAt() < Window.TRANSFER_LIFETIME_MS)
                     .toList());
@@ -233,70 +239,13 @@ public record BotState(Protocol.Hello hello, Protocol.State state, Window window
         return this;
     }
 
-    public boolean protocolCompatible() { return hello != null && hello.protocol() == Protocol.VERSION && "1.20.1".equals(hello.mcVersion()); }
+    public boolean protocolCompatible() { return hello != null && hello.protocol() == Protocol.VERSION && isSupportedMcVersion(hello.mcVersion()); }
     public boolean connected() { return connection == Connection.CONNECTED && protocolCompatible(); }
     public boolean renderable() { return connected() && hasState && "online".equals(status); }
 
     /** A single feed describes one bot; never attach its private inventory to a different player. */
     public boolean forPlayer(String name) {
         return connected() && "online".equals(status) && hello.bot().equals(name);
-    }
-
-    public static BotState ofSpectator(PlayerEntity player, RconSnapshot rcon, BotState feed) {
-        BotState local = ofSpectator(player, rcon);
-        if (feed == null || !feed.forPlayer(player.getGameProfile().getName())) return local;
-        return new BotState(feed.hello(), feed.hasState() ? feed.state() : local.state(), feed.window(), feed.cursor(),
-                "online", Connection.CONNECTED, feed.message(), local.actions(), true);
-    }
-
-    /**
-     * Builds the snapshot from the player the camera follows. When a fresh RCON reading for that player
-     * exists, its authoritative inventory, hunger and experience replace the client-side view; otherwise
-     * only the state this client receives directly is shown.
-     */
-    public static BotState ofSpectator(PlayerEntity player, RconSnapshot rcon) {
-        String name = player.getGameProfile().getName();
-        Protocol.Hello hello = new Protocol.Hello(Protocol.VERSION, name, "1.20.1", "pure");
-        float health = player.getHealth();
-        float absorption = player.getAbsorptionAmount();
-        float maxHealth = player.getMaxHealth();
-        long now = System.currentTimeMillis();
-        Protocol.State state = rcon != null && rcon.forPlayer(name) && rcon.fresh(now)
-                ? new Protocol.State(health, absorption, maxHealth, rcon.food(), rcon.saturation(), 20,
-                        new Protocol.Xp(rcon.xpLevel(), rcon.xpProgress()),
-                        rcon.armor(), rcon.hotbar(), rcon.offhand(), rcon.selected(), rcon.main())
-                : clientState(player, health, absorption, maxHealth);
-        return new BotState(hello, state, actionsOf(player, now), true);
-    }
-
-    /** Reads the spectated player's swing/eat/use timings that drive the first-person hand pass. */
-    private static Actions actionsOf(PlayerEntity player, long now) {
-        float swingProgress = player.getHandSwingProgress(1.0F);
-        long swingAt = swingProgress > 0.0F && swingProgress < 1.0F ? now - (long) (swingProgress * 350.0F) : 0L;
-        boolean using = player.isUsingItem();
-        boolean eating = using && player.getActiveItem().isFood();
-        long changedAt = eating ? now - player.getItemUseTime() * 50L : 0L;
-        long useAt = using ? now : 0L;
-        return new Actions("", changedAt, swingAt, eating, useAt);
-    }
-
-    private static Protocol.State clientState(PlayerEntity player, float health, float absorption, float maxHealth) {
-        // Empty slots decode to null, so this must be a null-tolerant list (List.of rejects nulls).
-        List<Protocol.ItemData> armor = Arrays.asList(
-                ItemCodec.toData(player.getEquippedStack(EquipmentSlot.HEAD)),
-                ItemCodec.toData(player.getEquippedStack(EquipmentSlot.CHEST)),
-                ItemCodec.toData(player.getEquippedStack(EquipmentSlot.LEGS)),
-                ItemCodec.toData(player.getEquippedStack(EquipmentSlot.FEET)));
-        Protocol.ItemData offhand = ItemCodec.toData(player.getEquippedStack(EquipmentSlot.OFFHAND));
-        Protocol.ItemData held = ItemCodec.toData(player.getEquippedStack(EquipmentSlot.MAINHAND));
-        int selected = MathHelper.clamp(player.getInventory().selectedSlot, 0, 8);
-        List<Protocol.ItemData> hotbar = new ArrayList<>(Protocol.emptySlots(9));
-        hotbar.set(selected, held);
-        return new Protocol.State(health, absorption, maxHealth,
-                MathHelper.clamp(player.getHungerManager().getFoodLevel(), 0, 20),
-                MathHelper.clamp(player.getHungerManager().getSaturationLevel(), 0, 20),
-                20, new Protocol.Xp(player.experienceLevel, player.experienceProgress),
-                armor, hotbar, offhand, selected, Protocol.emptySlots(27));
     }
 
     public float health() { return state.health(); }

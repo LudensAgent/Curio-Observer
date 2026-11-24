@@ -2,7 +2,6 @@ package dev.curio.observer.render;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import net.minecraft.util.math.Vec3d;
 import org.junit.jupiter.api.Test;
 
 class BroadcastCameraStateTest {
@@ -82,17 +81,17 @@ class BroadcastCameraStateTest {
         frame(0, 3, true);
         assertTrue(frame(0.8, 3, true).thirdPerson());
         Object newTarget = new Object();
-        assertSnap(state.update(newTarget, world, Vec3d.ZERO, 140, 80, 3, true, 3, 0.18, 900_000_000L), 140, 80);
+        assertSnap(state.update(newTarget, world, 0, 0, 0, 140, 80, 3, true, 3, 0.18, 900_000_000L), 140, 80);
         Object newWorld = new Object();
-        assertSnap(state.update(newTarget, newWorld, Vec3d.ZERO, 200, -80, 3, true, 3, 0.18, 1_000_000_000L), 200, -80);
-        assertSnap(state.update(newTarget, newWorld, new Vec3d(9, 0, 0), 270, 45, 3, true, 3, 0.18, 1_100_000_000L), 270, 45);
+        assertSnap(state.update(newTarget, newWorld, 0, 0, 0, 200, -80, 3, true, 3, 0.18, 1_000_000_000L), 200, -80);
+        assertSnap(state.update(newTarget, newWorld, 9, 0, 0, 270, 45, 3, true, 3, 0.18, 1_100_000_000L), 270, 45);
         state.reset();
-        assertSnap(state.update(newTarget, newWorld, new Vec3d(9, 0, 0), 10, 70, 3, true, 3, 0.18, 1_200_000_000L), 10, 70);
+        assertSnap(state.update(newTarget, newWorld, 9, 0, 0, 10, 70, 3, true, 3, 0.18, 1_200_000_000L), 10, 70);
     }
 
     @Test void configuredShortFollowDistanceCanStillEnterThirdPerson() {
-        state.update(target, world, Vec3d.ZERO, 0, 0, 1.5, true, 1.5, 0.18, 0);
-        assertTrue(state.update(target, world, Vec3d.ZERO, 0, 0, 1.5, true, 1.5, 0.18, 800_000_000L).thirdPerson());
+        state.update(target, world, 0, 0, 0, 0, 0, 1.5, true, 1.5, 0.18, 0);
+        assertTrue(state.update(target, world, 0, 0, 0, 0, 0, 1.5, true, 1.5, 0.18, 800_000_000L).thirdPerson());
     }
 
     private BroadcastCameraState.Frame frame(double seconds, double available, boolean roomy) {
@@ -101,16 +100,16 @@ class BroadcastCameraStateTest {
 
     private BroadcastCameraState.Frame update(double seconds, float yaw, float pitch, double available,
                                              boolean roomy, double smoothing) {
-        return state.update(target, world, Vec3d.ZERO, yaw, pitch, available, roomy, 3, smoothing,
+        return state.update(target, world, 0, 0, 0, yaw, pitch, available, roomy, 3, smoothing,
                 Math.round(seconds * 1_000_000_000));
     }
 
     private float simulate(int framesPerSecond) {
         BroadcastCameraState simulation = new BroadcastCameraState();
-        simulation.update(target, world, Vec3d.ZERO, 0, 0, 0, false, 3, 0.18, 0);
+        simulation.update(target, world, 0, 0, 0, 0, 0, 0, false, 3, 0.18, 0);
         BroadcastCameraState.Frame result = null;
         for (int frame = 1; frame <= framesPerSecond; frame++) {
-            result = simulation.update(target, world, Vec3d.ZERO, 90, 0, 0, false, 3, 0.18,
+            result = simulation.update(target, world, 0, 0, 0, 90, 0, 0, false, 3, 0.18,
                     Math.round(frame * 1_000_000_000.0 / framesPerSecond));
         }
         return result.yaw();
