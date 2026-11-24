@@ -1,0 +1,123 @@
+// Shared build logic for unobfuscated Fabric targets (MC 26.1+).
+// Expects project.ext: mcVersion, mcSpan, mcRange, fabricVersion, javaVersion, compatLayers, mixinClasses
+// Optional project.ext: loaderVersion (defaults to rootProject.loader_version), testCompatLayers
+
+def mcVer = project.ext.mcVersion
+def mcSpan = project.ext.mcSpan
+def mcRange = project.ext.mcRange
+def fapiVer = project.ext.fabricVersion
+def javaVer = project.ext.javaVersion as int
+def loaderVer = project.ext.has('loaderVersion') ? project.ext.loaderVersion : rootProject.property('loader_version')
+def modVer = rootProject.property('mod_version')
+
+version = "${modVer}-fabric-${mcSpan}"
+group = rootProject.property('maven_group')
+base {
+    archivesName = rootProject.property('archives_base_name')
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir rootProject.file('common/src/main/java')
+            srcDir rootProject.file('shared-mc/src/main/java')
+            project.ext.compatLayers.each { layer ->
+                srcDir rootProject.file("compat/${layer}/src/main/java")
+            }
+        }
+        resources {
+            srcDir rootProject.file('common/src/main/resources')
+            srcDir rootProject.file('shared-mc/src/main/resources')
+        }
+    }
+    test {
+        java {
+            if (project.ext.has('testCompatLayers')) {
+                project.ext.testCompatLayers.each { layer ->
+                    srcDir rootProject.file("compat/${layer}/src/test/java")
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${mcVer}"
+    implementation "net.fabricmc:fabric-loader:${loaderVer}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fapiVer}"
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "net.fabricmc:fabric-loader-junit:${loaderVer}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+def mixinJsonList = project.ext.mixinClasses.collect { "\"${it}\"" }.join(', ')
+def compatLevel = "JAVA_${javaVer}"
+
+processResources {
+    inputs.property 'mod_version', modVer
+    inputs.property 'mc_range', mcRange
+    inputs.property 'loader_version', loaderVer
+    inputs.property 'java_version', javaVer
+    inputs.property 'mixin_list', mixinJsonList
+    inputs.property 'compat_level', compatLevel
+
+    filesMatching('fabric.mod.json') {
+        expand(
+            version: modVer,
+            minecraft_range: mcRange,
+            loader_version: loaderVer,
+            java_version: javaVer
+        )
+    }
+    filesMatching('curio-observer.mixins.json') {
+        expand(
+            compatibility_level: compatLevel,
+            mixin_classes: mixinJsonList
+        )
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = javaVer
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaVer)
+    targetCompatibility = JavaVersion.toVersion(javaVer)
+    withSourcesJar()
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'curio.expectedMixins', project.ext.mixinClasses.join(',')
+    systemProperty 'curio.mcVersion', mcVer
+}
+
+tasks.register('verifyReleaseJar') {
+    dependsOn tasks.named('jar')
+    def jarFile = tasks.named('jar').flatMap { it.archiveFile }
+    inputs.file(jarFile)
+    doLast {
+        def f = jarFile.get().asFile
+        if (!f.exists() || f.length() < 10_000) {
+            throw new GradleException("Invalid release JAR: ${f}")
+        }
+        new java.util.jar.JarFile(f).withCloseable { jf ->
+            assert jf.getJarEntry('fabric.mod.json') != null : "Missing fabric.mod.json in ${f}"
+            assert jf.getJarEntry('curio-observer.mixins.json') != null : "Missing mixins.json in ${f}"
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyReleaseJar')
+}
+
+ext.releaseJarTask = tasks.named('jar')

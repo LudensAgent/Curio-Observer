@@ -1,0 +1,32 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+}
+
+ext {
+    mcVersion = '26.2'
+    mcSpan = '26.2'
+    mcRange = '26.2'
+    fabricVersion = '0.161.0+26.2'
+    javaVersion = 25
+    compatLayers = [
+        'env-262',
+        'item-components',
+        'hand-262',
+        'canvas-26',
+        'screen-26',
+        'mc-262',
+        'mixin-stability-26',
+        'mixin-lightmap-26',
+        'mixin-camera-26',
+        'mixin-hand-261',
+        'mixin-hud-262',
+        'mixin-spectator-26',
+    ]
+    testCompatLayers = ['test-mixin']
+    mixinClasses = [
+        'SpectatorHudMixin', 'InGameHudMixin', 'HeldItemRendererMixin',
+        'BroadcastCameraMixin', 'BroadcastStabilityMixin', 'BroadcastLightmapMixin'
+    ]
+}
+
+apply from: rootProject.file('gradle/fabric-unobf-target.gradle')

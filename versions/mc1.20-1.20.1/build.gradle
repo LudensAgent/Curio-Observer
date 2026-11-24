@@ -1,0 +1,33 @@
+plugins {
+    id 'net.fabricmc.fabric-loom-remap'
+}
+
+ext {
+    mcVersion = '1.20.1'
+    mcSpan = '1.20-1.20.1'
+    mcRange = '>=1.20 <=1.20.1'
+    fabricVersion = '0.92.12+1.20.1'
+    javaVersion = 17
+    compatLayers = [
+        'item-nbt',
+        'hand-1194',
+        'canvas-1200',
+        'screen-1200',
+        'mc-1200',
+        'mixin-terrain',
+        'mixin-stability-legacy',
+        'mixin-nightvision',
+        'mixin-lightmap-119',
+        'mixin-camera-double',
+        'mixin-hand-pose',
+        'mixin-hud-1200',
+        'mixin-spectator-1200',
+    ]
+    testCompatLayers = ['test-mixin', 'test-mc120']
+    mixinClasses = [
+        'SpectatorHudMixin', 'InGameHudMixin', 'HeldItemRendererMixin', 'WorldRendererMixin',
+        'BroadcastCameraMixin', 'BroadcastStabilityMixin', 'BroadcastLightmapMixin', 'BroadcastNightVisionMixin'
+    ]
+}
+
+apply from: rootProject.file('gradle/fabric-remap-target.gradle')

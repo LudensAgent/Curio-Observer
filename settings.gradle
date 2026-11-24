@@ -1,8 +1,31 @@
 pluginManagement {
     repositories {
         maven { url = 'https://maven.fabricmc.net/' }
-        gradlePluginPortal()
         mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        id 'net.fabricmc.fabric-loom-remap' version loom_version
+        id 'net.fabricmc.fabric-loom' version loom_version
     }
 }
+
 rootProject.name = 'curio-observer'
+
+include ':common'
+include ':versions:mc1.18.2'
+include ':versions:mc1.19-1.19.2'
+include ':versions:mc1.19.3'
+include ':versions:mc1.19.4'
+include ':versions:mc1.20-1.20.1'
+include ':versions:mc1.20.2-1.20.4'
+include ':versions:mc1.20.5-1.20.6'
+include ':versions:mc1.21-1.21.1'
+include ':versions:mc1.21.2-1.21.4'
+include ':versions:mc1.21.5'
+include ':versions:mc1.21.6-1.21.8'
+include ':versions:mc1.21.9-1.21.10'
+include ':versions:mc1.21.11'
+include ':versions:mc26.1-26.1.2'
+include ':versions:mc26.2'
+include ':versions:mc26.3'
